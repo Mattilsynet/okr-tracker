@@ -28,4 +28,4 @@ jobs:
     secrets:
       ENV_FILE: ${{ secrets.ENV_FILE_PROD }}
       FIREBASE_PROJECT_ID: okr-prod-98cb
-      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
