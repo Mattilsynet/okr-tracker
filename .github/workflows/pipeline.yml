@@ -7,9 +7,8 @@ on:
 jobs:
   test:
     uses: ./.github/workflows/test.yml
-
   deploy-dev:
-    name: Deploy to prod
+    name: Deploy to dev
     needs: [ test ]
     uses: ./.github/workflows/common.deploy.yml
 #    if: github.ref == 'refs/heads/master'
@@ -19,14 +18,14 @@ jobs:
       ENV_FILE: ${{ secrets.ENV_FILE_DEV }}
       FIREBASE_PROJECT_ID: okr-dev-e2e3
       FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_DEV }}
-#  deploy-prod:
-#    name: Deploy to prod
-#    needs: [ test ]
-#    uses: ./.github/workflows/common.deploy.yml
-#    if: github.ref == 'refs/heads/master'
-#    with:
-#      environment: production
-#    secrets:
-#      ENV_FILE: ${{ secrets.ENV_FILE_PROD }}
-#      FIREBASE_PROJECT_ID: okr-prod-98cb
-#      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
+  deploy-prod:
+    name: Deploy to prod
+    needs: [ test ]
+    uses: ./.github/workflows/common.deploy.yml
+    if: github.ref == 'refs/heads/master'
+    with:
+      environment: production
+    secrets:
+      ENV_FILE: ${{ secrets.ENV_FILE_PROD }}
+      FIREBASE_PROJECT_ID: okr-prod-98cb
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }
