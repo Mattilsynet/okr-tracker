@@ -79,7 +79,7 @@ export default {
   height: 4rem;
   padding: 0 0.6875rem;
   color: var(--color-text-secondary);
-  background: #D04234;
+  background: #d04234;
 
   &__title {
     font-weight: 500;

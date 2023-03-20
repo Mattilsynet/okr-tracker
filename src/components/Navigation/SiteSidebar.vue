@@ -92,7 +92,7 @@ export default {
   name: 'SiteSidebar',
 
   components: {
-    Logo: Logo,
+    Logo,
   },
 
   props: {
