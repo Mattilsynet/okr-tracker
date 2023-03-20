@@ -7,6 +7,7 @@
     "dev": "firebase emulators:start --import=./mock_data & vite",
     "dev:test": "firebase emulators:start --import=./tests & vite",
     "build": "vite build --mode production",
+    "build:ci": "vite build",
     "build:test": "vite build --mode staging",
     "test:e2e": "firebase emulators:start --import=./tests & vite & env-cmd -f ./.env.local cypress open",
     "test:e2e:headless": "firebase emulators:exec --project origo-okr-tracker --import=./tests & vite & (sleep 10 && env-cmd -f ./.env.local cypress run --headless)",
