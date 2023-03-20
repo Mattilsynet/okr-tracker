@@ -2,7 +2,6 @@ name: Pipeline
 
 on:
   push:
-#    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -13,6 +12,7 @@ jobs:
     name: Deploy to DEV
     needs: [ test ]
     uses: ./.github/workflows/deploy-dev.yml
+#    if: github.ref == 'refs/heads/master'
     secrets:
       ENV_FILE: ${{ secrets.ENV_FILE_DEV }}
       FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID_DEV }}

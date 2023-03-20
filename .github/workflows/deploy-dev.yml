@@ -26,7 +26,7 @@ jobs:
 
       - name: Populate env file
         run: |
-          echo "${{ secrets.ENV_FILE_DEV }}" > .env
+          echo "${{ secrets.ENV_FILE }}" > .env
           if ! grep -q VITE_PROJECT_ID .env; then
             echo "::error:: The .env file is likely not populated correctly"
             exit 1
