@@ -1,8 +1,11 @@
-name: Deploy to PROD
+name: Deploy
 
 on:
-  workflow_dispatch:
   workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: false
     secrets:
       ENV_FILE:
         required: true
@@ -14,7 +17,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -37,8 +40,8 @@ jobs:
           export NODE_OPTIONS="--max-old-space-size=4096"
           npm ci
           npm --prefix functions ci functions
-          npm run build
-      - name: Deploy PROD
+          vite build --mode ${{ inputs.environment }}
+      - name: Deploy DEV
         run: |
           npm install -g firebase-tools
           firebase deploy --project="${{ secrets.FIREBASE_PROJECT_ID }}" --token="${{ secrets.FIREBASE_TOKEN }}"
