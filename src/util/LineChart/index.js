@@ -78,10 +78,10 @@ export default class LineChart {
    * Render the graph. Takes the following parameters:
    *
    * `startValue`: Optional. The start value of the y axis. Will start at the
-   *     lowest value present in `progress` if unset.
+   *   lowest value present in `progress` if unset.
    *
    * `targetValue`: Optional. The end value of the y axis. Will end at the
-   *     highest value present in `progress` if unset.
+   *   highest value present in `progress` if unset.
    *
    * `startDate`: The first date on the x axis.
    *
@@ -93,8 +93,20 @@ export default class LineChart {
    *   object specifying `startDate, `endDate`, and `value`.
    *
    * `kpi`: Optional. A KPI to format the y axis for.
+   *
+   * `initialValue`: Optional. If given, plot a value `initialValue` at
+   *   `startDate`.
    */
-  render({ startValue, targetValue, startDate, endDate, progress, targets, kpi }) {
+  render({
+    startValue,
+    targetValue,
+    startDate,
+    endDate,
+    progress,
+    targets,
+    kpi,
+    initialValue,
+  }) {
     let fromValue = startValue;
     let toValue = targetValue;
 
@@ -171,7 +183,7 @@ export default class LineChart {
       .call(
         axisBottom(this.x)
           .tickFormat((d) => formatDate(d, daysBetween))
-          .ticks(Math.min(Math.ceil(daysBetween) || 1, 6))
+          .ticks(Math.min(Math.ceil(daysBetween) || 1, 5))
       )
       .call(styleAxisX);
 
@@ -179,16 +191,13 @@ export default class LineChart {
       .map((d) => {
         const timestamp = d.timestamp.toDate();
         timestamp.setHours(0, 0, 0, 0);
-
-        return {
-          timestamp,
-          value: +d.value,
-          comment: d?.comment,
-          kpi,
-          startValue: +fromValue,
-        };
+        return { timestamp, value: +d.value, comment: d?.comment, kpi };
       })
       .sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1));
+
+    if (data.length && typeof initialValue === 'number') {
+      data.unshift({ timestamp: _startDate, value: initialValue });
+    }
 
     this.canvas.selectAll('.single-point').remove();
 
@@ -226,7 +235,7 @@ export default class LineChart {
     if (this.legend) {
       const legendItems = [
         {
-          label: kpi ? kpi.name : i18n.t('general.value'),
+          label: kpi ? i18n.t('kpi.progress') : i18n.t('general.value'),
           color: GRAPH_COLORS.valueLine,
         },
         ...(targets && targets.length

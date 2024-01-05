@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="create-container">
+  <page-layout breakpoint="tablet">
+    <div class="card">
       <h1 class="title-1">{{ $t('admin.product.create') }}</h1>
 
       <form-section>
@@ -28,12 +28,16 @@
           :label="$t('admin.product.parentDepartment')"
           select-label="name"
           rules="required"
-          :select-options="departments"
+          :select-options="departmentOptions"
         />
 
-        <div class="form-group">
-          <span class="form-label">{{ $t('general.teamMembers') }}</span>
+        <div class="pkt-form-group">
+          <span class="pkt-form-label" for="teamMembers">
+            {{ $t('general.teamMembers') }}
+            <span class="pkt-badge">{{ $t('validation.optional') }}</span>
+          </span>
           <v-select
+            id="teamMembers"
             v-model="team"
             multiple
             :options="users"
@@ -48,14 +52,14 @@
 
         <template #actions="{ handleSubmit, submitDisabled }">
           <btn-save
-            :label="$t('btn.create')"
+            :text="$t('btn.create')"
             :disabled="submitDisabled || loading"
             @click="handleSubmit(save)"
           />
         </template>
       </form-section>
     </div>
-  </div>
+  </page-layout>
 </template>
 
 <script>
@@ -78,7 +82,13 @@ export default {
   }),
 
   computed: {
-    ...mapState(['departments', 'users']),
+    ...mapState(['departments', 'users', 'user']),
+
+    departmentOptions() {
+      return this.user.superAdmin
+        ? this.departments
+        : this.departments.filter((d) => this.user.admin.includes(d.organization.id));
+    },
   },
 
   methods: {
@@ -92,7 +102,6 @@ export default {
         organization: db.collection('organizations').doc(department.organization.id),
         team: team.map(({ id }) => db.collection('users').doc(id)),
         archived: false,
-        slack: [],
       };
 
       try {

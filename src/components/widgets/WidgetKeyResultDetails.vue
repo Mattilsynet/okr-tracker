@@ -1,27 +1,30 @@
 <template>
-  <widget v-if="activeKeyResult" :title="$t('general.details')" size="small">
+  <widget v-if="activeKeyResult" :title="$t('general.details')" size="small" collapsable>
     <div class="details">
-      <div v-if="activeKeyResult.objective" class="details__item">
+      <div v-if="activeObjective" class="details__item">
         <h3 class="title-3 details__item-heading">{{ $t('keyResult.belongsTo') }}</h3>
         <div class="details__item-body">
           <div class="details__item-value">
             <router-link
               :to="{
                 name: 'ObjectiveHome',
-                params: { objectiveId: activeKeyResult.objective.id },
+                params: { objectiveId: activeObjective.id },
               }"
             >
-              {{ activeKeyResult.objective.name }}
+              {{ activeObjective.name }}
             </router-link>
           </div>
         </div>
       </div>
 
-      <div v-if="activePeriod && activePeriod.startDate" class="details__item">
+      <div
+        v-if="activeObjective && formattedPeriod(activeObjective)"
+        class="details__item"
+      >
         <h3 class="title-3 details__item-heading">{{ $t('objective.period') }}</h3>
         <div class="details__item-body">
           <div class="details__item-value">
-            {{ activePeriod.name }} ({{ formatPeriodDates(activePeriod) }})
+            {{ formattedPeriod(activeObjective) }}
           </div>
         </div>
       </div>
@@ -77,7 +80,7 @@
       <div v-if="activeKeyResult.startValue !== undefined" class="details__item">
         <h3 class="title-3 details__item-heading">{{ $t('keyResult.startValue') }}</h3>
         <div class="details__item-body">
-          <div class="details__item-icon fa fa-hashtag"></div>
+          <span class="details__item-icon">#</span>
           <div class="details__item-value">{{ activeKeyResult.startValue }}</div>
         </div>
       </div>
@@ -85,7 +88,7 @@
       <div v-if="activeKeyResult.targetValue !== undefined" class="details__item">
         <h3 class="title-3 details__item-heading">{{ $t('keyResult.targetValue') }}</h3>
         <div class="details__item-body">
-          <div class="details__item-icon fa fa-hashtag"></div>
+          <span class="details__item-icon">#</span>
           <div class="details__item-value">{{ activeKeyResult.targetValue }}</div>
         </div>
       </div>
@@ -109,14 +112,17 @@
 <script>
 import { mapState } from 'vuex';
 import { db } from '@/config/firebaseConfig';
-import { periodDates, dateShort, dateLong } from '@/util';
+import { dateLong } from '@/util';
+import { formattedPeriod } from '@/util/okr';
+import ProfileModal from '@/components/modals/ProfileModal.vue';
+import Widget from './WidgetWrapper.vue';
 
 export default {
   name: 'WidgetKeyResultDetails',
 
   components: {
-    Widget: () => import('./WidgetWrapper.vue'),
-    ProfileModal: () => import('@/components/modals/ProfileModal.vue'),
+    Widget,
+    ProfileModal,
   },
 
   data: () => ({
@@ -126,7 +132,7 @@ export default {
   }),
 
   computed: {
-    ...mapState(['activeKeyResult', 'activePeriod']),
+    ...mapState('okrs', ['activeObjective', 'activeKeyResult']),
     createdBy() {
       return (
         this.activeKeyResult.createdBy.displayName || this.activeKeyResult.createdBy.id
@@ -155,9 +161,7 @@ export default {
   },
 
   methods: {
-    formatPeriodDates(period) {
-      return periodDates(period, dateShort);
-    },
+    formattedPeriod,
 
     formatDate(date) {
       return dateLong(date.toDate());
@@ -184,5 +188,11 @@ export default {
   &:hover {
     background: rgba(var(--color-grayscale-50-rgb), 0.1);
   }
+}
+
+.details__item-icon {
+  margin-top: 0;
+  font-weight: 900;
+  user-select: none;
 }
 </style>

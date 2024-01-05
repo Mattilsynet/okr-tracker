@@ -1,5 +1,5 @@
-import Btn from './BtnBase.vue';
 import BtnDelete from './BtnDelete.vue';
 import BtnSave from './BtnSave.vue';
+import BtnCancel from './BtnCancel.vue';
 
-export { Btn, BtnDelete, BtnSave };
+export { BtnDelete, BtnSave, BtnCancel };

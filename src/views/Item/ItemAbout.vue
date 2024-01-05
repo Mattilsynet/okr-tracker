@@ -1,71 +1,68 @@
 <template>
-  <div class="container">
-    <main class="main">
-      <section class="item-info">
-        <div
-          v-if="activeItem.missionStatement || activeItem.targetAudience"
-          class="item-info__group"
-        >
-          <h3 class="title-3">{{ aboutItemTitle }}</h3>
+  <page-layout breakpoint="tablet-big" class="about-page">
+    <header class="about-page__header">
+      <h1 class="pkt-txt-54">{{ activeItem.name }}</h1>
+      <pkt-button
+        v-if="hasEditRights"
+        v-tooltip="$t('admin.item.change', { name: activeItem.name })"
+        skin="tertiary"
+        size="small"
+        variant="icon-only"
+        icon-name="edit"
+        @onClick="showItemDrawer = true"
+      />
+    </header>
 
-          <div class="item-info__content">
-            <div v-if="activeItem.missionStatement" class="item-info__box">
-              <h4 class="title-2">
-                <pkt-icon name="hands-globe" />{{ $t('document.mission') }}
-              </h4>
-              <HTML-output :html="activeItem.missionStatement" />
-            </div>
+    <section>
+      <HTML-output class="pkt-txt-24-light" :html="activeItem.missionStatement" />
+    </section>
 
-            <div v-if="activeItem.targetAudience" class="item-info__box">
-              <h3 class="title-2">
-                <pkt-icon name="two-people-dancing" />{{ $t('dashboard.targetAudience') }}
-              </h3>
-              <HTML-output :html="activeItem.targetAudience" />
-            </div>
-          </div>
-        </div>
+    <section v-if="activeItem.targetAudience">
+      <h2 class="pkt-txt-30">{{ $t('dashboard.targetAudience') }}</h2>
+      <HTML-output class="pkt-txt-18" :html="activeItem.targetAudience" />
+    </section>
 
-        <div v-if="children" class="item-info__group">
-          <h3 class="title-3">{{ childrenTitle }}</h3>
+    <section v-if="children">
+      <h2 class="pkt-txt-30">{{ childrenTitle }}</h2>
+      <div
+        v-for="child in children"
+        :key="child.id"
+        class="item-info__box item-info__box--link"
+      >
+        <h3 class="pkt-txt-24">{{ child.name }}</h3>
+        <HTML-output class="pkt-txt-18" :html="child.missionStatement" />
+      </div>
+    </section>
 
-          <div class="item-info__content item-info__content--grid">
-            <div
-              v-for="child in children"
-              :key="child.id"
-              class="item-info__box item-info__box--link"
-            >
-              <h4 class="title-2">{{ child.name }}</h4>
-              <HTML-output :html="child.missionStatement" />
-            </div>
-          </div>
-        </div>
-      </section>
+    <template v-if="hasEditRights || isMemberOfOrganization">
+      <h2 class="pkt-txt-30">{{ $t('about.members') }}</h2>
+      <role-members
+        v-for="role in sortByDisplayOrder(Object.keys(teamMembers))"
+        :key="role"
+        :role="role"
+        :members-with-role="teamMembers[role]"
+        @openModal="openProfileModal"
+      />
+    </template>
 
-      <section v-if="teamMembers" class="item-info">
-        <div class="item-info__group">
-          <h3 class="title-3">{{ $t('general.team') }}</h3>
+    <item-drawer
+      v-if="hasEditRights && showItemDrawer"
+      :item="activeItem"
+      @close="showItemDrawer = false"
+    />
 
-          <role-members
-            v-for="role in sortByDisplayOrder(Object.keys(teamMembers))"
-            :key="role"
-            :role="role"
-            :members-with-role="teamMembers[role]"
-            @openModal="openProfileModal"
-          />
-        </div>
-
-        <profile-modal
-          v-if="showProfileModal"
-          :id="chosenProfileId"
-          @close="closeProfileModal"
-        />
-      </section>
-    </main>
-  </div>
+    <profile-modal
+      v-if="showProfileModal"
+      :id="chosenProfileId"
+      @close="closeProfileModal"
+    />
+  </page-layout>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
+import { PktButton } from '@oslokommune/punkt-vue2';
+import { isDepartment, isOrganization } from '@/util/getActiveItemType';
 import {
   possibleDevelopers,
   possibleAdm,
@@ -73,81 +70,134 @@ import {
   displayOrder,
 } from '@/config/jobPositions';
 import HTMLOutput from '@/components/HTMLOutput.vue';
-import getActiveItemType from '@/util/getActiveItemType';
+import i18n from '@/locale/i18n';
+import ItemDrawer from '@/components/drawers/EditItemDrawer.vue';
+import ProfileModal from '@/components/modals/ProfileModal.vue';
+import RoleMembers from '@/components/RoleMembers.vue';
 
 export default {
   name: 'ItemAbout',
 
   components: {
     HTMLOutput,
-    RoleMembers: () => import('@/components/RoleMembers.vue'),
-    ProfileModal: () => import('@/components/modals/ProfileModal.vue'),
+    PktButton,
+    ItemDrawer,
+    ProfileModal,
+    RoleMembers,
   },
 
   data: () => ({
-    aboutItemTitle: null,
-    childrenTitle: null,
-    children: [],
-    teamMembers: {},
+    showItemDrawer: false,
     showProfileModal: false,
     chosenProfileId: null,
   }),
 
   computed: {
-    ...mapState(['activeItem', 'departments', 'products']),
+    ...mapGetters(['hasEditRights', 'tree']),
+    ...mapState(['activeItem', 'departments', 'products', 'user']),
+
+    teamMembers() {
+      const members = {};
+
+      this.activeItem.team.forEach((employee) => {
+        if (!employee.position) {
+          if (!members.others) {
+            members.others = [];
+          }
+          members.others.push(employee);
+        } else if (possibleDevelopers.includes(employee.position)) {
+          if (!members.developers) {
+            members.developers = [];
+          }
+          members.developers.push(employee);
+        } else if (possibleDesigners.includes(employee.position)) {
+          if (!members.designers) {
+            members.designers = [];
+          }
+          members.designers.push(employee);
+        } else if (possibleAdm.includes(employee.position)) {
+          if (!members.administration) {
+            members.administration = [];
+          }
+          members.administration.push(employee);
+        } else {
+          if (!members[employee.position]) {
+            members[employee.position] = [];
+          }
+          members[employee.position].push(employee);
+        }
+      });
+
+      return members;
+    },
+
+    children() {
+      if (isOrganization(this.activeItem)) {
+        return this.departments.filter(
+          (department) => department.organization.id === this.activeItem.id
+        );
+      }
+      if (isDepartment(this.activeItem)) {
+        return this.products.filter(
+          (product) => product.department.id === this.activeItem.id
+        );
+      }
+
+      return null;
+    },
+
+    /**
+     * Return a fitting title for the list of sub-items under the current item.
+     */
+    childrenTitle() {
+      if (isOrganization(this.activeItem)) {
+        return i18n.t('about.organizationChildren');
+      }
+      if (isDepartment(this.activeItem)) {
+        return i18n.t('about.departmentChildren');
+      }
+
+      return null;
+    },
+
+    /**
+     * Return `true` if the current user is a member of any item in the active
+     * item's organization.
+     */
+    isMemberOfOrganization() {
+      const currentOrgId = this.activeItem.organization?.id || this.activeItem.id;
+      const org = this.tree.find((o) => o.id === currentOrgId);
+
+      if (org.team.map(({ id }) => id).includes(this.user.id)) {
+        return true;
+      }
+
+      for (const dep of org.children) {
+        if (dep.team.map(({ id }) => id).includes(this.user.id)) {
+          return true;
+        }
+
+        for (const prod of dep.children) {
+          if (prod.team.map(({ id }) => id).includes(this.user.id)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    },
   },
 
   watch: {
-    activeItem: {
-      immediate: true,
-      handler(item) {
-        const itemType = getActiveItemType(item);
-
-        if (itemType === 'organization') {
-          this.aboutItemTitle = this.$t('about.aboutOrganization');
-          this.childrenTitle = this.$t('general.departments');
-          this.children = this.departments.filter(
-            (department) => department.organization.id === this.activeItem.id
-          );
-        } else if (itemType === 'department') {
-          this.aboutItemTitle = this.$t('about.aboutDepartment');
-          this.childrenTitle = this.$t('general.products');
-          this.children = this.products.filter(
-            (product) => product.department.id === this.activeItem.id
-          );
-        } else if (itemType === 'product') {
-          this.aboutItemTitle = this.$t('about.aboutProduct');
-          this.childrenTitle = null;
-          this.children = null;
-        }
-
-        this.teamMembers = {};
-
-        this.activeItem.team.forEach((employee) => {
-          if (!employee.position) {
-            !this.teamMembers.others
-              ? (this.teamMembers.others = [employee])
-              : this.teamMembers.others.push(employee);
-          } else if (possibleDevelopers.includes(employee.position)) {
-            !this.teamMembers.developers
-              ? (this.teamMembers.developers = [employee])
-              : this.teamMembers.developers.push(employee);
-          } else if (possibleDesigners.includes(employee.position)) {
-            !this.teamMembers.designers
-              ? (this.teamMembers.designers = [employee])
-              : this.teamMembers.designers.push(employee);
-          } else if (possibleAdm.includes(employee.position)) {
-            !this.teamMembers.administration
-              ? (this.teamMembers.administration = [employee])
-              : this.teamMembers.administration.push(employee);
-          } else {
-            !this.teamMembers[employee.position]
-              ? (this.teamMembers[employee.position] = [employee])
-              : this.teamMembers[employee.position].push(employee);
-          }
-        });
-      },
+    showItemDrawer(show) {
+      if (!show && this.$route.query.edit) {
+        this.$router.replace({ query: null });
+      }
     },
+  },
+
+  mounted() {
+    this.showItemDrawer = String(this.$route.query.edit).toLowerCase() === 'true';
   },
 
   methods: {
@@ -169,56 +219,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/typography';
+.about-page {
+  padding: 2rem;
 
-.item-info {
-  position: relative;
-  padding: 2rem 1.5rem;
-  overflow: auto;
-  background-color: var(--color-white);
-
-  &__group {
-    &:not(:first-of-type) {
-      margin-top: 4rem;
-    }
-
-    .title-3 {
-      margin-bottom: 1rem;
-      color: var(--color-grayscale-40);
-    }
-  }
-
-  &__content {
+  &__header {
     display: flex;
-    flex-direction: column;
-    gap: 2rem;
-
-    @media screen and (min-width: bp(m)) {
-      flex-direction: row;
-
-      &--grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
+    align-items: center;
+    justify-content: space-between;
   }
+}
 
-  &__box {
-    flex: 1 1 0px;
-    font-size: typography.$font-size-2;
-    line-height: 1.5rem;
+section {
+  margin: 2.75rem 0 3.625rem 0;
 
-    .title-2 {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-      color: var(--color-blue-dark);
-
-      svg {
-        height: 1.5rem;
-        margin-right: 0.75rem;
-      }
-    }
+  .item-info__box:first-of-type h3 {
+    margin-top: 1.5rem;
   }
+}
+
+h2 {
+  margin: 1.25rem 0;
+}
+
+h3 {
+  margin: 2rem 0 0.5rem;
 }
 </style>

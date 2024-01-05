@@ -1,8 +1,8 @@
 <template>
-  <widget :title="$t('weight.heading')" size="small">
+  <widget :title="$t('weight.heading')" size="small" collapsable>
     <div class="scales">
       <router-link
-        v-for="{ id, weight, name } in weights"
+        v-for="{ id, weight, name } in keyResults"
         :key="id"
         v-tooltip.bottom="name"
         :to="getToLink(id)"
@@ -18,27 +18,19 @@
 <script>
 import { scaleLinear } from 'd3-scale';
 import { max } from 'd3-array';
-import objectiveInPeriod from '@/util/okr';
+import { db } from '@/config/firebaseConfig';
+import Widget from './WidgetWrapper.vue';
 
 export default {
   name: 'WidgetWeights',
 
   components: {
-    Widget: () => import('./WidgetWrapper.vue'),
+    Widget,
   },
 
   props: {
-    items: {
-      type: Array,
-      required: true,
-    },
-    activeItem: {
+    objective: {
       type: Object,
-      required: false,
-      default: () => ({}),
-    },
-    type: {
-      type: String,
       required: true,
     },
   },
@@ -46,40 +38,28 @@ export default {
   data: () => ({
     chart: null,
     scale: scaleLinear(),
+    keyResults: [],
   }),
 
-  computed: {
-    weights() {
-      if (!this.activeItem) {
-        return [];
-      }
-
-      let siblings = null;
-
-      if (this.type === 'objective') {
-        siblings = (o) => objectiveInPeriod(this.activeItem, o);
-      } else {
-        siblings = ({ objective }) => objective.split('/')[1] === this.activeItem.id;
-      }
-
-      const processWeights = ({ weight, id, name }) => ({
-        weight,
-        id,
-        name,
-      });
-
-      return this.items.filter(siblings).map(processWeights);
-    },
-  },
-
   watch: {
-    weights: {
+    keyResults: {
       immediate: true,
-      handler(weights) {
-        const maxValue = max([0, max(weights, ({ weight }) => weight)]);
+      handler(keyResults) {
+        const maxValue = max([0, max(keyResults, ({ weight }) => weight)]);
         this.scale.domain([0, maxValue]);
       },
     },
+  },
+
+  async created() {
+    const objectiveRef = await db.doc(`objectives/${this.objective.id}`);
+    const keyResults = await db
+      .collection('keyResults')
+      .where('archived', '==', false)
+      .where('objective', '==', objectiveRef)
+      .orderBy('name');
+
+    this.$bind('keyResults', keyResults);
   },
 
   mounted() {
@@ -94,10 +74,6 @@ export default {
     },
 
     getToLink(id) {
-      if (this.type === 'objective') {
-        return { name: 'ObjectiveHome', params: { objectiveId: id } };
-      }
-
       return { name: 'KeyResultHome', params: { keyResultId: id } };
     },
   },

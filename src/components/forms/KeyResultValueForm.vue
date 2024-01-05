@@ -5,7 +5,7 @@
       input-type="input"
       name="value"
       :label="$t('keyResult.newValue')"
-      rules="required"
+      rules="required|min_value:0"
       type="number"
     />
 
@@ -14,7 +14,7 @@
       input-type="textarea"
       name="comment"
       :rows="commentRows"
-      :label="$t('keyResult.addComment')"
+      :label="$t('fields.comment')"
       :placeholder="$t('keyResult.commentPlaceholder')"
     />
 
@@ -61,7 +61,9 @@ export default {
     keyResult: {
       immediate: true,
       async handler() {
-        this.value = this.keyResult.currentValue || this.keyResult.startValue || 0;
+        if (this.value !== null) {
+          this.value = this.keyResult.currentValue || this.keyResult.startValue || 0;
+        }
       },
     },
   },
@@ -69,6 +71,8 @@ export default {
   methods: {
     submitForm() {
       this.$emit('save', this.value, this.comment);
+      this.value = null;
+      this.comment = '';
     },
   },
 };

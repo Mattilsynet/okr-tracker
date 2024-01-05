@@ -4,41 +4,32 @@
 
     <div v-if="!selectedUser && !viewAddUsers" class="users">
       <div class="search">
-        <label class="form__group">
-          <input
-            v-model="query"
-            class="form__field"
-            type="text"
-            :placeholder="$t('admin.users.search', { count: users.length })"
-          />
-        </label>
+        <input
+          v-model="query"
+          class="pkt-form-input"
+          type="text"
+          :placeholder="$t('admin.users.search', { count: users.length })"
+        />
       </div>
 
       <div class="users__list">
         <button
           v-for="user in filteredUsers"
           :key="user.id"
-          class="users__list-item"
+          class="users__list-item pkt-txt-14-medium"
           @click="selectedUser = user"
         >
-          <span
-            class="users__list-item-icon fa"
-            :class="
-              (user.admin && user.admin.length > 0) || user.superAdmin
-                ? 'fa-user-cog'
-                : 'fa-user'
-            "
-          ></span>
+          <pkt-icon class="icon" :name="isAdmin(user) ? 'cogwheel' : 'user'" />
           <span class="users__list-item-name">
             {{ user.displayName || user.id }}
           </span>
-          <i class="users__list-item-chevron fa fa-chevron-right" />
+          <pkt-icon class="icon" name="chevron-right" />
         </button>
       </div>
       <div class="users__footer">
-        <button class="btn btn--fw" @click="viewAddUsers = true">
+        <pkt-button skin="secondary" @onClick="viewAddUsers = true">
           {{ $t('admin.users.addUsers') }}
-        </button>
+        </pkt-button>
       </div>
     </div>
 
@@ -49,18 +40,18 @@
     >
       <template #back>
         <div>
-          <button class="btn" @click="selectedUser = null">
+          <pkt-button skin="secondary" @onClick="selectedUser = null">
             {{ $t('admin.users.backToUsers') }}
-          </button>
+          </pkt-button>
         </div>
       </template>
     </edit-user>
     <add-users v-if="viewAddUsers" @close="viewAddUsers = false">
       <template #back>
         <div>
-          <button class="btn" @click="viewAddUsers = false">
+          <pkt-button skin="secondary" @onClick="viewAddUsers = false">
             {{ $t('admin.users.backToUsers') }}
-          </button>
+          </pkt-button>
         </div>
       </template>
     </add-users>
@@ -70,6 +61,10 @@
 <script>
 import { mapState } from 'vuex';
 import Fuse from 'fuse.js';
+import { PktButton } from '@oslokommune/punkt-vue2';
+import isAdmin from '@/util/user';
+import AddUsers from './AddUsers.vue';
+import EditUser from './EditUser.vue';
 
 const fuseSettings = {
   threshold: 0.5,
@@ -93,8 +88,9 @@ export default {
   name: 'AdminUsers',
 
   components: {
-    EditUser: () => import('./EditUser.vue'),
-    AddUsers: () => import('./AddUsers.vue'),
+    EditUser,
+    AddUsers,
+    PktButton,
   },
 
   data: () => ({
@@ -125,6 +121,8 @@ export default {
       }
     },
   },
+
+  methods: { isAdmin },
 };
 </script>
 
@@ -134,9 +132,7 @@ export default {
 .add-users {
   display: flex;
   flex-direction: column;
-  background: white;
-  border-radius: 3px;
-  box-shadow: 0 2px 4px rgba(var(--color-grayscale-40-rgb), 0.3);
+  background: var(--color-gray-light);
 }
 
 .add-users,
@@ -152,38 +148,27 @@ export default {
 
 .users__list-item {
   display: flex;
+  gap: 0.5rem;
   align-items: center;
   padding: 0.5rem 1rem;
   color: var(--color-text);
-  font-weight: 500;
   background: none;
   border: 0;
-  border-bottom: 1px solid var(--color-grayscale-10);
+  border-bottom: 2px solid var(--color-border);
   cursor: pointer;
 
-  &:hover {
-    background: var(--color-gray-light);
-
-    & > .users__list-item-chevron {
-      opacity: 1;
-    }
+  &:hover .users__list-item-name {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
   }
 }
 
-.users__list-item-chevron {
-  margin-left: auto;
-  padding-left: 0.25rem;
-  opacity: 0.25;
-}
-
-.users__list-item-icon {
-  flex: 0 0 1.75rem;
-  text-align: left;
-}
-
 .users__list-item-name {
+  flex: 1 0 auto;
   overflow: hidden;
   white-space: nowrap;
+  text-align: left;
   text-overflow: ellipsis;
 }
 
@@ -191,5 +176,14 @@ export default {
   margin-top: auto;
   padding: 1rem;
   font-size: 0.79rem;
+
+  .pkt-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+.icon {
+  height: 1rem;
 }
 </style>

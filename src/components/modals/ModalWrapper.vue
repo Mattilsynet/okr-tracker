@@ -2,12 +2,17 @@
   <div ref="modalOverlay" class="overlay" @keydown.esc="close">
     <div :class="['modal', `modal--${variant}`]">
       <div class="modal__header">
-        <h2 class="title-2">
+        <h1 class="pkt-txt-18-medium">
           <slot name="header" />
-        </h2>
-        <button ref="closeButton" class="btn btn--ter btn--icon" @click="close">
-          <i class="fa fa-times" />
-        </button>
+        </h1>
+        <pkt-button
+          ref="closeButton"
+          size="small"
+          variant="icon-only"
+          icon-name="close"
+          skin="tertiary"
+          @onClick="close"
+        />
       </div>
 
       <div ref="modalContent" class="modal__content">
@@ -28,9 +33,14 @@
 <script>
 import { focusable } from 'tabbable';
 import * as focusTrap from 'focus-trap';
+import { PktButton } from '@oslokommune/punkt-vue2';
 
 export default {
   name: 'ModalWrapper',
+
+  components: {
+    PktButton,
+  },
 
   props: {
     variant: {
@@ -38,6 +48,18 @@ export default {
       required: false,
       default: 'normal',
       validator: (value) => ['normal', 'wide'].includes(value),
+    },
+
+    initialFocus: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+
+    clickOutside: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
 
@@ -60,13 +82,16 @@ export default {
     close() {
       this.$emit('close');
     },
+
     createFocusTrap() {
       this.focusTrap = focusTrap.createFocusTrap(this.$refs.modalOverlay, {
-        onActivate: this.setInitialFocus,
+        initialFocus: this.initialFocus,
+        onActivate: this.initialFocus ? this.setInitialFocus : null,
         allowOutsideClick: true,
       });
       this.focusTrap.activate();
     },
+
     setInitialFocus() {
       const focusableElement =
         focusable(this.$refs.modalContent)[0] || this.$refs.closeButton;

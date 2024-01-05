@@ -4,11 +4,308 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [UNRELEASED]
 
+### Added
+
+- "Lifting" objectives are now also allowed during the creation flow, not only
+  when edited.
+
+### Changed
+
+- Enhanced the responsiveness of OKR pane views for a better user experience.
+- Enhanced the responsiveness of all drawers. They are now more compact and fill
+  the entire viewport on mobile.
+- Drag and drop ordering of measurements and key results are now triggered by
+  using a specific handle (the "drag icon"). This prevents accidental dragging,
+  especially on mobile devices.
+
 ### Fixed
 
-- The date picker on the KPI details page no longer disappears when the selected
-  period doesn't contain any measurements.
-- The item tab bar is now more responsive.
+- Fixed disappearing navigation header for mobile users.
+- Added missing aria roles and attributes for navbar components.
+
+### Breaking changes
+
+- The API endpoint for listing KPIs (measurements) now uses cursor-based
+  pagination to alleviate scalability issues in the previous implementation.
+- The status API endpoint providing certain global KPI metrics was broken and
+  have been removed.
+
+### Security
+
+- Updated dependencies.
+
+## [4.0.0] 2023-12-06
+
+### Added
+
+- The team member listing on the about page has been reintroduced, but is now
+  only visible to members of the same organization.
+- The selected period for OKRs and KPIs is now remembered between visits.
+
+### Changed
+
+- Detail views for both objectives and key results are now shown as panes in the
+  OKR timeline view. The number of simultaneously visible panes depends on the
+  viewport size (and is otherwise stacked). Clicking objectives in the timeline
+  now toggles the detail pane rather than adding objectives to a list. To group
+  objectives in a list (and see combined progression), the meta key must now be
+  pressed while selecting one or more objectives.
+- Key results can now be rearranged by drag and drop.
+- New key results are now given a start value of 0, a target value of 100, and
+  percentage as unit of measurement by default.
+- Objectives can now be "lifted" from a product or department to the level above
+  (to a department or organization, respectively).
+- The API authorization mechanism has been reworked. The API now accepts a pair
+  of `okr-client-id` and `okr-client-secret` headers to authorize clients. The
+  interface for managing client credentials can be found in the item navigation
+  bar.
+- The period selected for the OKR and measurement views are no longer
+  synchronized and can be adjusted individually.
+- The default OKR period is now "all". Objectives outside a set period are now
+  dimmed.
+
+### Deprecated
+
+- The `okr-team-secret` header is deprecated and users should migrate to the new
+  `okr-client-id` and `okr-client-secret` headers as described above. Existing
+  `okr-team-secret` values will continue to work until they've been migrated.
+
+### Removed
+
+- The Slack integration has been removed.
+
+### Fixed
+
+- Fixed Markdown rendering of descriptions on objective, key result, and
+  measurement detail pages.
+- Product result indicators and key figures are now correctly included as part
+  of parent measurements when switching between items.
+- The edit button for key result values is now only visible to users with the
+  appropriate permissions.
+- Fixed overlapping dates on the x-axis of some line plots on small screens.
+- Organizations, departments, and products in the admin panel are now filtered
+  based on the admin level of the current user.
+- Organization admins should now be allowed to edit own organizations including
+  child departments and products.
+- The link to the admin page is no longer visible to non-admin users.
+
+### Security
+
+- More security headers are now set: `Content-Security-Policy`,
+  `Referrer-Policy`, `X-Content-Type-Options`, and `X-Frame-Options`.
+- Updated dependencies.
+
+## [3.10.0] 2023-10-10
+
+### Changed
+
+- Organization, department and product details are now edited from within the
+  current item's about page.
+- Made links clickable in the description of objectives, key results and
+  measurements.
+- It is no longer possible to close open modals or drawers by clicking outside
+  them. This is meant to prevent accidental data loss in unsaved forms. Drawers
+  can however still be closed by outside click after form submission.
+- Items in the admin panel now link directly to each respective item about page
+  with the edit drawer opened.
+- The currently active item tab is now kept when navigating between
+  organizational items.
+- Validation in forms is now less "eager" and errors are only displayed after
+  attempted form submissions.
+- Administration of measurements has been moved to drawers and follows the same
+  pattern as when editing OKRs and other items.
+- It is now again possible to adjust the weight of each key result used in the
+  calculation of overall progression of an objective.
+
+### Removed
+
+- The admin panel tab has been completely removed from the item tab bar (all
+  functionality moved to drawers).
+
+### Fixed
+
+- Fixed create/edit/delete rights for organization admins.
+- Organization, department and product filters in the admin panel should no
+  longer disappear when the search result count reaches a certain threshold.
+- Improved WCAG compliance with respect to text color contrast.
+- Fixed a problem that would sometimes cause an "infinite spinner" when a new
+  version of the app was deployed.
+- Fixed cropping of dropdown menus when creating new
+  organizations/departments/products.
+- Unauthorized users can no longer attempt to drag and drop reorder
+  measurements.
+
+### Security
+
+- Fixed an XSS issue with the rendering of tooltips.
+- Updated dependencies.
+
+## [3.9.0] 2023-09-01
+
+### Added
+
+- Added a shortcut to quickly select the last used period when creating a new
+  objective.
+
+### Changed
+
+- Measurements can now be rearranged by drag and drop on the measurement list
+  and detail pages.
+- The date column now comes first in progress tables and CSV exports.
+- Export of progress graph (png) and raw data (csv) are now triggered from its
+  respective widgets in the measurement details page.
+- Improved "not found" pages.
+- All icons are now provided by Punkt and the previous icon provider, Font
+  Awesome, is no longer loaded.
+- Node.js 18 is now the default runtime for all Cloud Functions and when running
+  the app locally.
+- Upgraded to Firebase 9.
+- Progression values are now required to be positive on entry, both from the web
+  interface and from the API.
+- The design of the period selector has been refreshed.
+
+### Removed
+
+- Dropped support for Node.js 16 and below.
+
+### Fixed
+
+- Removed flickering on the measurement details page when moving between
+  measurements.
+- Logging in by email and password is now possible again.
+- Fixed an error when editing measurement progress values.
+- Fixed ordering of items in the main menu (by respecting the user locale when
+  sorting).
+- Fixed the API base URL on the API spec page.
+- Fixed outside click detection for dropdown menus.
+- Regular team members are now also allowed to update key results within ended
+  periods. This is a simplification and fixes a bug where some users couldn't
+  update key results for objectives with an individual start and end date.
+
+### Security
+
+- Updated dependencies.
+
+## [3.8.0] 2023-07-03
+
+### Changed
+
+- New flow for registering and editing of objectives and key results.
+- Introduced individual start- and end dates on objectives instead of them being
+  tied to a predefined period.
+- The timeline view is now the default (and only) view on the OKR page.
+- A sidebar has been added to the timeline view that provides an optional
+  at-a-glance summary of one or more selected objectives.
+- The timeline view now always displays all objectives. The period selector puts
+  a specified period in focus instead of filtering the objectives. The date
+  range can now also be set freely, and the period choice is made persistent
+  between the OKR page and the measurements page.
+- The timeline view now fills all available screen space when browsing OKRs.
+- Goals in the timeline view now fills up horizontally instead of having one
+  goal per row.
+- All buttons are now Punkt-styled.
+- Graphs for percentage measurements are no longer locked to 100% on the y-axis
+  by default.
+- The main navigation menu icon has been replaced by a more generic one.
+- The design of empty states and error pages have been refreshed.
+- The CSV export of measurements no longer includes the time part of the
+  timestamps, as only one measurement can exist per day anyway.
+- Line breaks in measurement comments are now rendered.
+- Users are no longer redirected after archiving objectives and key results. It
+  is now possible to restore these objects from their respective detail pages.
+
+### Removed
+
+- The compact and detailed objective list views have been removed.
+
+### Fixed
+
+- Fixed a bug causing dropdown toggles in the navigation bar not working.
+- Fixed handling forms when pressing the Enter button.
+
+### Security
+
+- Updated dependencies.
+
+## [3.7.0] 2023-06-06
+
+### Added
+
+- A new "neutral" choice for the preferred trend of measurements.
+- A download button has been added to the measurements overview page for
+  downloading an image of multiple measurements simultaneously.
+
+### Changed
+
+- The option of where to start measurement y-axes has been set to zero by
+  default for existing measurements too.
+- The initial value of OKR key results are now plotted on the OKR period's start
+  date in the line chart.
+- Typography across the app is now more Punkt-styled.
+- The help page has been reworked.
+- The list view is now the default view on the measurements page.
+- The site header and navigation bar has been integrated while more view
+  specific options are kept in a separate toolbar.
+- The about page has been redesigned.
+- The layout of pages are now based on the Punkt grid.
+- The home page has been redesigned. The selected organization are now persisted
+  as a user preference between visits.
+
+### Removed
+
+- The team member listing on the about page has been removed.
+
+### Fixed
+
+- Fixed a bug that made pressing Enter on the access request page clear the form
+  instead of submitting it.
+- Fixed anchor link positioning.
+- Fixed a bug causing the goal reach icon to be halfway drawn when the goal
+  isn't reached yet.
+- Fixed the CSV download function for measurement data (regression introduced in
+  version 3.5.0).
+- Fixed misleading percentage change numbers.
+
+### Security
+
+- Updated dependencies.
+
+## [3.6.0] 2023-05-05
+
+### Added
+
+- A new timeline view for objectives has been added (visualized in a Gantt
+  chart).
+- A separate list view has been added to the measurements tab.
+
+### Changed
+
+- The OKR period selection tabs have been moved into a dropdown menu in the top
+  bar matching the period selector on the measurements page.
+- Improved OKR overview page styling.
+- Improved tooltip styling.
+- All forms now use Punkt-styled input fields.
+- Y-axes in measurement graphs now start counting from zero by default. It's
+  possible to revert individual measurements to the old behavior of starting the
+  y-axis around the lowest measured value in the measurement admin settings.
+- The change within a selected period (first and latest progress value) is now
+  displayed beneath the progress graph for measurements.
+
+### Fixed
+
+- Fixed rendering of charts containing goals with missing values.
+- Fixed a bug in the measurement goal value input field.
+- The period selector dropdown menu has been made more responsive.
+- The key result progression update form is now cleared on submit to prevent
+  double submission.
+- Top bar content centering has been fixed on public pages.
+
+## [3.5.0] 2023-04-03
+
+### Added
+
+- Added mini graphs to KPI cards.
+- A new site admin API for updating user details has been added.
 
 ### Changed
 
@@ -16,25 +313,21 @@ All notable changes to this project will be documented in this file. The format 
   It also includes two more pre-defined periods: current and previous quarter.
 - The API endpoints for updating key result and KPI progression values now
   accept an optional `comment` parameter.
-
-## [3.4.0] 2023-03-03
+- The measurements tab has been redesigned and now integrates the previous
+  measurement details page. This in order to provide an improved overview of all
+  measurements.
+- Upgraded from Vue 2.6 to 2.7.
 
 ### Fixed
 
-- Fixed a bug where document references in a KPI document would be overwritten
-  by resolved document data. This also includes a fix to the API which would
-  fail while attempting to resolve these invalid document references.
-- The state of an opened measurement edit form is now kept as is, even if the
-  document has been updated in the background (e.g. while setting goals). This
-  also prevents other data fields of the document, that might have been updated
-  separately, from being overwritten with outdated data when saving the form
-  (e.g. cached progress and goals).
-- When deleting a user, all references to the user are now also removed from
-  organization and department member lists, like it is for products.
-- Date pickers used throughout the app now respect the selected language and
-  are translated accordingly.
+- Fixed a bug that caused KPI trend indicators to be displayed in inverse.
+- The date picker on the KPI details page no longer disappears when the selected
+  period doesn't contain any measurements.
 - The admin link is no longer displayed in the item tab bar for users without
   edit rights.
+- The item tab bar is now more responsive.
+
+## [3.4.0] 2023-03-03
 
 ### Changed
 
@@ -51,7 +344,21 @@ All notable changes to this project will be documented in this file. The format 
 - The page scroll manipulation when administrating measurements have been
   somewhat relaxed. When viewing details of a specific measurement, the admin
   tab now also links directly to the measurement in question.
-- Added mini graphs to KPI cards.
+
+### Fixed
+
+- Fixed a bug where document references in a KPI document would be overwritten
+  by resolved document data. This also includes a fix to the API which would
+  fail while attempting to resolve these invalid document references.
+- The state of an opened measurement edit form is now kept as is, even if the
+  document has been updated in the background (e.g. while setting goals). This
+  also prevents other data fields of the document, that might have been updated
+  separately, from being overwritten with outdated data when saving the form
+  (e.g. cached progress and goals).
+- When deleting a user, all references to the user are now also removed from
+  organization and department member lists, like it is for products.
+- Date pickers used throughout the app now respect the selected language and
+  are translated accordingly.
 
 ## [3.3.0] 2023-02-03
 
@@ -222,7 +529,7 @@ Tracker, and strive to make new releases more frequently than before.
 - Removed the previous dashboard view and all related code.
 - Removed API endpoint returning the current user's authentication token.
 
-### Fixes
+### Fixed
 
 - Various text and translation fixes.
 - Fixed a display bug for radio buttons.

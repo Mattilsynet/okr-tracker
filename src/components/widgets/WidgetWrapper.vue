@@ -7,24 +7,30 @@
       collapsable ? `widget--${show ? 'open' : 'collapsed'}` : '',
     ]"
   >
-    <button
-      v-if="collapsable"
-      v-tooltip="show ? $t('btn.minimize') : $t('btn.expand')"
-      class="btn btn--ter widget__toggle"
-      @click="toggle"
-    >
-      <i :class="['fa', `fa-chevron-${show ? 'up' : 'down'}`]" />
-    </button>
-
     <header
       v-if="$slots.header || title"
       class="widget__header"
       v-on="collapsable ? { click: toggle } : {}"
     >
       <slot v-if="$slots.header" name="header" />
-      <h3 v-else :class="size === 'small' ? 'title-3' : 'title-2'">
-        {{ title }}
-      </h3>
+      <template v-else>
+        <h3 :class="size === 'small' ? 'pkt-txt-16' : 'pkt-txt-18'">
+          {{ title }}
+        </h3>
+        <div v-if="$slots['title-actions']" class="widget__actions">
+          <slot name="title-actions" />
+        </div>
+      </template>
+
+      <pkt-button
+        v-if="collapsable"
+        v-tooltip="show ? $t('btn.minimize') : $t('btn.expand')"
+        class="widget__toggle"
+        size="small"
+        skin="tertiary"
+        variant="icon-only"
+        :icon-name="show ? 'chevron-thin-up' : 'chevron-thin-down'"
+      />
     </header>
 
     <div v-if="$slots.default && show" class="widget__body">
@@ -38,8 +44,14 @@
 </template>
 
 <script>
+import { PktButton } from '@oslokommune/punkt-vue2';
+
 export default {
   name: 'WidgetWrapper',
+
+  components: {
+    PktButton,
+  },
 
   props: {
     title: {
@@ -61,12 +73,18 @@ export default {
   },
 
   data: () => ({
-    show: true,
+    isCollapsed: false,
   }),
+
+  computed: {
+    show() {
+      return !this.collapsable || this.isCollapsed;
+    },
+  },
 
   methods: {
     toggle() {
-      this.show = !this.show;
+      this.isCollapsed = !this.isCollapsed;
     },
   },
 };
@@ -81,20 +99,30 @@ export default {
   width: 100%;
   margin-bottom: 1rem;
   padding: 1.5rem;
-  background-color: var(--color-white);
-
-  &__toggle {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    padding: 0.5rem;
-  }
+  border: 2px solid var(--color-border);
 
   &__header {
-    .title-2,
-    .title-3 {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    h3 {
       margin-bottom: 0;
       color: var(--color-text);
+    }
+
+    .widget__actions {
+      display: flex;
+      gap: 0.5rem;
+
+      ::v-deep .separator {
+        border-left: 1px solid var(--color-border);
+      }
+    }
+
+    .widget__actions,
+    .widget__toggle {
+      margin-left: auto;
     }
   }
 
@@ -110,12 +138,6 @@ export default {
 
   &--small {
     padding: 1rem;
-
-    .widget__toggle {
-      top: 0.5rem;
-      right: 0.5rem;
-      padding: 0.5rem;
-    }
   }
 }
 </style>

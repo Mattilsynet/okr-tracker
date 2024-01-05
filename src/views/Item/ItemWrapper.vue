@@ -1,12 +1,19 @@
 <template>
-  <router-view v-show="!loading"></router-view>
+  <router-view v-if="activeItem" v-show="!loading"></router-view>
+  <not-found-page v-else back-to="Home" />
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import { itemCommon as routerGuard } from '@/router/router-guards';
+import NotFoundPage from '@/components/pages/NotFoundPage.vue';
 
 export default {
   name: 'ItemWrapper',
+
+  components: {
+    NotFoundPage,
+  },
 
   async beforeRouteUpdate(to, from, next) {
     this.loading = true;
@@ -22,6 +29,10 @@ export default {
   data: () => ({
     loading: true,
   }),
+
+  computed: {
+    ...mapState(['activeItem']),
+  },
 
   mounted() {
     this.loading = false;

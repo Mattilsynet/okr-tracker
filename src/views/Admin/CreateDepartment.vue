@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="create-container">
+  <page-layout breakpoint="tablet">
+    <div class="card">
       <h1 class="title-1">{{ $t('admin.department.create') }}</h1>
 
       <form-section>
@@ -30,13 +30,17 @@
           :label="$t('admin.department.parentOrganisation')"
           select-label="name"
           rules="required"
-          :select-options="organizations"
+          :select-options="organizationOptions"
           data-cy="dep-parentOrg"
         />
 
-        <div class="form-group">
-          <span class="form-label">{{ $t('general.teamMembers') }}</span>
+        <div class="pkt-form-group">
+          <span class="pkt-form-label" for="teamMembers">
+            {{ $t('general.teamMembers') }}
+            <span class="pkt-badge">{{ $t('validation.optional') }}</span>
+          </span>
           <v-select
+            id="teamMembers"
             v-model="team"
             multiple
             :options="users"
@@ -51,7 +55,7 @@
 
         <template #actions="{ handleSubmit, submitDisabled }">
           <btn-save
-            :label="$t('btn.create')"
+            :text="$t('btn.create')"
             :disabled="submitDisabled || loading"
             data-cy="btn-createDep"
             @click="handleSubmit(save)"
@@ -59,7 +63,7 @@
         </template>
       </form-section>
     </div>
-  </div>
+  </page-layout>
 </template>
 
 <script>
@@ -82,7 +86,13 @@ export default {
   }),
 
   computed: {
-    ...mapState(['organizations', 'users']),
+    ...mapState(['organizations', 'users', 'user']),
+
+    organizationOptions() {
+      return this.user.superAdmin
+        ? this.organizations
+        : this.organizations.filter((o) => this.user.admin.includes(o.id));
+    },
   },
 
   methods: {
@@ -94,7 +104,6 @@ export default {
         organization: db.collection('organizations').doc(organization.id),
         archived: false,
         team: team.map(({ id }) => db.collection('users').doc(id)),
-        slack: [],
       };
 
       this.loading = true;

@@ -1,7 +1,7 @@
 <template>
   <div class="tooltip">
     <div class="date">{{ formattedDate }}</div>
-    <div class="value">{{ formattedValue }}</div>
+    <div class="value pkt-txt-20">{{ formattedValue }}</div>
     <div v-if="comment">{{ comment }}</div>
   </div>
 </template>
@@ -48,23 +48,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/typography';
-
 .tooltip {
   > div {
     max-width: 200px;
     margin: 0.5rem 0;
     font-weight: 500;
-    font-size: typography.$font-size-1;
     overflow-wrap: break-word;
   }
 
   .date {
     font-weight: 400;
-  }
-
-  .value {
-    font-size: typography.$font-size-4;
   }
 }
 </style>

@@ -1,6 +1,5 @@
 export default {
-  view: 'compact',
-  startPage: null,
+  view: 'timeline',
   widgets: {
     itemHome: {
       progression: true,
@@ -25,4 +24,5 @@ export default {
       department: {},
     },
   },
+  homeOrganization: null,
 };

@@ -19,6 +19,22 @@ export function kpiFormats() {
 }
 
 /**
+ * Return a list of available KPI start value display options.
+ */
+export function kpiStartValues() {
+  return [
+    {
+      id: 'zero',
+      label: i18n.t('kpi.startValues.zero'),
+    },
+    {
+      id: 'min',
+      label: i18n.t('kpi.startValues.min'),
+    },
+  ];
+}
+
+/**
  * Return a list of available KPI expected trend options.
  */
 export function kpiTrendOptions() {
@@ -30,6 +46,10 @@ export function kpiTrendOptions() {
     {
       id: 'decrease',
       label: i18n.t('kpi.trendOptions.decrease'),
+    },
+    {
+      id: 'neutral',
+      label: i18n.t('kpi.trendOptions.neutral'),
     },
   ];
 }
@@ -129,23 +149,20 @@ export function formatKPIValue(kpi, value = null, options = {}) {
 }
 
 /**
- * Return an appropriate value interval for a given KPI format type.
+ * Return progress data cached on the KPI object.
+ *
+ * `kpi` is the KPI document to return cached progress data for.
+ * `startDate` is the start date to filter by (inclusive).
+ * `endDate` is the end date to filter by (inclusive).
  */
-export function kpiInterval(formatId) {
-  if (formatId === 'percentage') {
-    return [0, 1];
-  }
-  return [null, null];
-}
-
-export function getKPIProgress(startDate, endDate, kpi) {
+export function getCachedKPIProgress(kpi, startDate, endDate) {
   if (!kpi?.progress) {
-    return null;
+    return [];
   }
 
   const data = JSON.parse(kpi.progress);
 
-  const coll = data
+  return data
     .filter((d) => {
       const date = new Date(d[0]);
       return (!startDate || date >= startDate) && (!endDate || date <= endDate);
@@ -159,12 +176,17 @@ export function getKPIProgress(startDate, endDate, kpi) {
         comment: m[2],
       };
     })
-    .sort((a, b) => (a.timestamp.toDate() > b.timestamp.toDate() ? 1 : -1));
-
-  return coll;
+    .sort((a, b) => (a.timestamp.toDate() > b.timestamp.toDate() ? -1 : 1));
 }
 
-export function getKPIProgressQuery(startDate, endDate, kpi) {
+/**
+ * Return KPI progress collection query.
+ *
+ * `kpi` is the KPI document to build a collection query for.
+ * `startDate` is the start date to filter by (inclusive).
+ * `endDate` is the end date to filter by (inclusive).
+ */
+export function getKPIProgressQuery(kpi, startDate, endDate) {
   let query = db.collection(`kpis/${kpi.id}/progress`);
 
   if (startDate) {
@@ -175,5 +197,61 @@ export function getKPIProgressQuery(startDate, endDate, kpi) {
     query = query.where('timestamp', '<=', endDate);
   }
 
-  return query;
+  return query.orderBy('timestamp', 'desc');
+}
+
+/**
+ * Return a filtered list of measurement values where duplicated values for each
+ * date are removed.
+ *
+ * `progressCollection` is the list of progress records to filter.
+ */
+export function filterDuplicatedProgressValues(progressCollection) {
+  const seenDates = [];
+
+  return progressCollection.filter((a) => {
+    const date = a.timestamp.toDate().toISOString().slice(0, 10);
+    if (!seenDates.includes(date)) {
+      seenDates.push(date);
+      return true;
+    }
+    return false;
+  });
+}
+
+const _kpiOrder = ['ri', 'keyfig', 'plain'];
+
+/**
+ * Return a function for comparing two KPIs for sorting.
+ *
+ * The `itemId` defines which "item" they are to be sorted within, as KPIs can
+ * have different orders within different items.
+ *
+ * The returned function returns a negative number if `a` should come before
+ * `b`, otherwise it returns a positive number.
+ *
+ * KPIs are ordered on two levels, first by KPI type, then by their set order
+ * within that type. To retain backwards compatibility for KPIs that haven't
+ * gotten any order set yet, they're ordered by their name in that case.
+ */
+export function compareKPIs(itemId) {
+  return (a, b) => {
+    // First sort by KPI type.
+    if (a.kpiType !== b.kpiType) {
+      return _kpiOrder.indexOf(a.kpiType) - _kpiOrder.indexOf(b.kpiType);
+    }
+    // Then sort by order only if both have one.
+    if ('order' in a && itemId in a.order && 'order' in b && itemId in b.order) {
+      return a.order[itemId] - b.order[itemId];
+    }
+    // When only one of them has an order, sort that one first.
+    if ('order' in a && itemId in a.order) {
+      return -1;
+    }
+    if ('order' in b && itemId in b.order) {
+      return 1;
+    }
+    // Otherwise fall back to ordering by name.
+    return a.name.localeCompare(b.name);
+  };
 }

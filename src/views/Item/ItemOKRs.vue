@@ -1,185 +1,184 @@
 <template>
-  <div class="container">
-    <main class="main">
-      <header>
-        <h2 class="title-1">{{ $t('general.OKRsLong') }}</h2>
-      </header>
+  <div class="okr-panes">
+    <pane-layout v-if="!notFoundState && (timelineObjectives.length || dataLoading)">
+      <!-- Timeline -->
+      <timeline-pane @add-objective="openObjectiveDrawer(false)" />
 
-      <section>
-        <tab-list
-          aria-label="Velg periode"
-          :tabs="tabs"
-          :active-tab="activeTab"
-          :set-active-tab="handleTabChange"
-          :tab-ids="tabIds"
+      <!-- Workbench (objective list) -->
+      <workbench-pane v-if="workbenchObjectives.length" />
+
+      <!-- Objective -->
+      <objective-pane
+        v-if="activeObjective"
+        @edit-objective="openObjectiveDrawer(true)"
+        @add-key-result="openKeyResultDrawer(false)"
+      />
+
+      <!-- Key result -->
+      <key-result-pane
+        v-if="activeObjective && activeKeyResult"
+        @edit-key-result="openKeyResultDrawer(true)"
+      />
+    </pane-layout>
+
+    <not-found-page
+      v-else-if="notFoundState"
+      :heading="
+        $t(`notFound.${!activeObjective ? 'objectiveHeading' : 'keyResultHeading'}`)
+      "
+      :body="$t(`notFound.${!activeObjective ? 'objectiveBody' : 'keyResultBody'}`)"
+      back-to="ItemHome"
+      :back-text="$t('btn.back')"
+    />
+
+    <empty-page
+      v-else
+      :heading="$t('empty.noObjectives.heading')"
+      :body="$t('empty.noObjectives.body')"
+    >
+      <div v-if="hasEditRights" data-mode="dark">
+        <pkt-button
+          :text="$t('btn.createObjective')"
+          skin="primary"
+          variant="icon-left"
+          icon-name="plus-sign"
+          @onClick="showObjectiveDrawer = true"
         />
+      </div>
+    </empty-page>
 
-        <tab-panel :active-tab="activeTab" :tab-ids="tabIds">
-          <content-loader-action-bar
-            v-if="dataLoading"
-            class="itemHome__header--content-loader"
-          ></content-loader-action-bar>
-          <action-bar v-else-if="periodObjectives.length" />
-          <content-loader-item v-if="dataLoading"></content-loader-item>
-          <empty-state
-            v-else-if="!periodObjectives.length && !dataLoading"
-            :icon="'exclamation'"
-            :heading="$t('empty.noPeriods.heading')"
-            :body="$t('empty.noPeriods.body')"
-          >
-            <router-link
-              v-if="hasEditRights"
-              class="btn btn--ter"
-              :to="{ name: 'ItemAdmin', query: { tab: 'okr' } }"
-            >
-              {{ $t('empty.noPeriods.buttonText') }}
-            </router-link>
-          </empty-state>
-          <ul v-if="periodObjectives.length && !dataLoading">
-            <li
-              v-for="objective in periodObjectives"
-              :key="objective.id"
-              class="itemHome__objectives--item"
-            >
-              <objective-row :objective="objective"></objective-row>
-              <ul v-if="objective.keyResults.length">
-                <li
-                  v-for="keyResult in objective.keyResults"
-                  :key="keyResult.id"
-                  class="keyResultRow"
-                  :class="{ 'keyResultRow--isCompact': isCompact }"
-                >
-                  <key-result-row :key-result="keyResult"></key-result-row>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </tab-panel>
-      </section>
-    </main>
+    <objective-drawer
+      v-if="showObjectiveDrawer"
+      :objective="drawerEditMode ? activeObjective : null"
+      :newest-objective="newestObjective"
+      @create="objectiveCreated"
+      @archive="$router.replace({ name: 'ItemHome' })"
+      @restore="
+        $router.replace({
+          name: 'ObjectiveHome',
+          params: { objectiveId: $event.id },
+        })
+      "
+      @close="closeObjectiveDrawer"
+      @add-key-result="openKeyResultDrawer(false)"
+    />
 
-    <aside v-if="activeItem" class="aside widgets">
-      <widget
-        v-if="activePeriod && activePeriod.progression"
-        :title="$t(`widget.progression.period`)"
-        size="small"
-      >
-        <progression-chart :progression="activePeriod.progression" />
-      </widget>
-      <widget-weights type="objective" :active-item="activePeriod" :items="objectives" />
-    </aside>
+    <key-result-drawer
+      v-if="activeObjective && showKeyResultDrawer"
+      :objective="activeObjective"
+      :key-result="drawerEditMode ? activeKeyResult : null"
+      @archive="
+        $router.replace({
+          name: 'ObjectiveHome',
+          params: { objectiveId: activeObjective.id },
+        })
+      "
+      @restore="
+        $router.replace({
+          name: 'KeyResultHome',
+          params: { objectiveId: activeObjective.id, keyResultId: $event.id },
+        })
+      "
+      @close="closeKeyResultDrawer"
+    />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState, mapActions } from 'vuex';
-import { isBefore, addDays, isWithinInterval } from 'date-fns';
-import objectiveInPeriod from '@/util/okr';
-import tabIdsHelper from '@/util/tabUtils';
-import { periodDates } from '@/util';
-import ContentLoaderItem from '@/components/ContentLoader/ContentLoaderItem.vue';
-import ContentLoaderActionBar from '@/components/ContentLoader/ContentLoaderActionBar.vue';
-import TabList from '@/components/TabList.vue';
-import TabPanel from '@/components/TabPanel.vue';
-import WidgetWrapper from '@/components/widgets/WidgetWrapper.vue';
-import WidgetWeights from '@/components/widgets/WidgetWeights.vue';
-import ProgressionChart from '@/components/ProgressionChart.vue';
+import { firestoreEncode } from '@/util/firebaseUtil';
+import { PktButton } from '@oslokommune/punkt-vue2';
+import routerGuard from '@/router/router-guards/itemOKRs';
+import PaneLayout from '@/components/layout/PaneLayout.vue';
+import TimelinePane from '@/components/panes/TimelinePane.vue';
+import ObjectivePane from '@/components/panes/ObjectivePane.vue';
+import KeyResultPane from '@/components/panes/KeyResultPane.vue';
+import WorkbenchPane from '@/components/panes/WorkbenchPane.vue';
+import ObjectiveDrawer from '@/components/drawers/EditObjective.vue';
+import KeyResultDrawer from '@/components/drawers/EditKeyResult.vue';
+import EmptyPage from '@/components/pages/EmptyPage.vue';
+import NotFoundPage from '@/components/pages/NotFoundPage.vue';
 
 export default {
-  name: 'ItemHome',
+  name: 'ItemOKRs',
 
   components: {
-    ActionBar: () => import('@/components/ActionBar.vue'),
-    ObjectiveRow: () => import('@/components/ObjectiveRow.vue'),
-    KeyResultRow: () => import('@/components/KeyResultRow.vue'),
-    EmptyState: () => import('@/components/EmptyState.vue'),
-    Widget: WidgetWrapper,
-    WidgetWeights,
-    ProgressionChart,
-    ContentLoaderItem,
-    ContentLoaderActionBar,
-    TabPanel,
-    TabList,
+    PktButton,
+    PaneLayout,
+    TimelinePane,
+    ObjectivePane,
+    KeyResultPane,
+    WorkbenchPane,
+    ObjectiveDrawer,
+    KeyResultDrawer,
+    EmptyPage,
+    NotFoundPage,
   },
 
+  beforeRouteUpdate: routerGuard,
+
   data: () => ({
-    activeTab: 0,
+    drawerEditMode: false,
+    showObjectiveDrawer: false,
+    showKeyResultDrawer: false,
+    notFoundState: false,
   }),
 
   computed: {
-    ...mapState([
-      'activeItem',
-      'activePeriod',
-      'dataLoading',
-      'keyResults',
-      'objectives',
-      'periods',
-      'user',
-    ]),
+    ...mapState(['activeItem', 'dataLoading']),
+    ...mapState('okrs', ['selectedPeriod', 'activeObjective', 'activeKeyResult']),
     ...mapGetters(['hasEditRights']),
+    ...mapGetters('okrs', [
+      'objectivesWithID',
+      'timelineObjectives',
+      'workbenchObjectives',
+    ]),
 
-    isCompact() {
-      return this.user.preferences.view === 'compact';
-    },
-
-    tabIds() {
-      return tabIdsHelper('periods');
-    },
-
-    filteredPeriods() {
-      if (this.hasEditRights) {
-        return this.periods;
-      }
-      const daysInAdvance = 7; // Prior to period start
-
-      return this.periods.filter(({ startDate }) =>
-        isBefore(startDate.toDate(), addDays(new Date(), daysInAdvance))
-      );
-    },
-
-    tabs() {
-      return this.filteredPeriods.map((period) => ({
-        tabName: period.name,
-        tooltip: { content: periodDates(period) },
-      }));
-    },
-
-    periodObjectives() {
-      if (!this.activePeriod) {
-        return [];
+    newestObjective() {
+      if (!this.objectivesWithID.length) {
+        return null;
       }
 
-      return this.objectives
-        .filter((o) => objectiveInPeriod(this.activePeriod, o))
-        .map((o) => ({
-          ...o,
-          id: o.id,
-          keyResults: this.keyResults.filter(
-            (kr) => kr.objective === `objectives/${o.id}`
-          ),
-        }));
+      return this.objectivesWithID.slice().sort((a, b) => {
+        if (a.created && b.created) {
+          return a.created.seconds > b.created.seconds ? -1 : 1;
+        }
+        return 0;
+      })[0];
     },
   },
 
-  created() {
-    if (this.filteredPeriods.length > 0) {
-      const defaultPeriodIndex = this.getCurrentPeriodIndex() || 0;
-      this.setPeriod(this.filteredPeriods[defaultPeriodIndex].id);
-      this.setActiveTab(defaultPeriodIndex);
-    }
+  watch: {
+    $route: {
+      immediate: false,
+      handler: 'updateActive',
+    },
+  },
+
+  async created() {
+    await this.setData();
+  },
+
+  async beforeDestroy() {
+    await this.setActiveObjective(null);
+    await this.setActiveKeyResult(null);
   },
 
   methods: {
     ...mapActions(['set_active_period_and_data', 'setDataLoading']),
+    ...mapActions('okrs', [
+      'setActiveObjective',
+      'setActiveKeyResult',
+      'addWorkbenchObjective',
+    ]),
 
-    setActiveTab(tabIndex) {
-      this.activeTab = tabIndex;
-    },
-
-    async setPeriod(activePeriodId) {
+    async setData() {
       try {
         await this.setDataLoading(true);
-        await this.set_active_period_and_data(activePeriodId);
+        await this.set_active_period_and_data({
+          item: this.activeItem,
+        });
+        await this.updateActive();
       } catch (e) {
         console.log(e);
       } finally {
@@ -187,56 +186,115 @@ export default {
       }
     },
 
-    periodDates,
+    async updateActive() {
+      this.notFoundState = false;
+      const { objectiveId, keyResultId } = this.$route.params;
 
-    async handleTabChange(tabIndex) {
-      const activePeriodId = this.filteredPeriods[tabIndex].id;
-      await this.setPeriod(activePeriodId);
-      this.setActiveTab(tabIndex);
-    },
+      if (!objectiveId && (this.activeObjective || this.activeKeyResult)) {
+        await this.setActiveObjective(null);
+        await this.setActiveKeyResult(null);
+        return;
+      }
+      if (!keyResultId && this.activeKeyResult) {
+        await this.setActiveKeyResult(null);
+      }
 
-    getCurrentPeriodIndex() {
-      const now = new Date();
-
-      for (const [index, period] of this.filteredPeriods.entries()) {
-        if (
-          period.startDate &&
-          period.endDate &&
-          isWithinInterval(now, {
-            start: period.startDate.toDate(),
-            end: period.endDate.toDate(),
-          })
-        ) {
-          return index;
+      if (objectiveId) {
+        if (objectiveId !== this.activeObjective?.id) {
+          await this.setActiveObjective(firestoreEncode(objectiveId));
+        }
+        if (!this.activeObjective) {
+          this.notFoundState = true;
         }
       }
-      return null;
+
+      if (this.activeObjective && keyResultId) {
+        if (keyResultId !== this.activeKeyResult?.id) {
+          await this.setActiveKeyResult(firestoreEncode(keyResultId));
+        }
+        if (!this.activeKeyResult) {
+          this.notFoundState = true;
+        }
+      }
+    },
+
+    openObjectiveDrawer(edit) {
+      this.drawerEditMode = edit;
+      this.showObjectiveDrawer = true;
+    },
+
+    closeObjectiveDrawer() {
+      this.showObjectiveDrawer = false;
+      this.drawerEditMode = false;
+    },
+
+    openKeyResultDrawer(edit) {
+      this.drawerEditMode = edit;
+      this.showObjectiveDrawer = false;
+      this.showKeyResultDrawer = true;
+    },
+
+    closeKeyResultDrawer() {
+      this.showKeyResultDrawer = false;
+      this.drawerEditMode = false;
+    },
+
+    async objectiveCreated(objective) {
+      if (!this.objectivesWithID.length) {
+        // `state.objectives` does not seems to be reactive until the first
+        // objective is added. This fixes bug where empty state is still
+        // shown when adding the first objective.
+        await this.setData();
+      }
+
+      this.$router.push({ name: 'ObjectiveHome', params: { objectiveId: objective.id } });
+
+      if (this.workbenchObjectives.length) {
+        await this.addWorkbenchObjective(objective.id);
+      }
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.keyResultRow {
-  &:not(:first-child) {
-    margin-top: 4px;
-  }
+@use '@oslokommune/punkt-css/dist/scss/abstracts/mixins/typography' as *;
 
-  &--isCompact {
-    @media screen and (min-width: bp(s)) {
-      &:not(:first-child) {
-        margin-top: 1px;
-      }
-    }
-  }
+.okr-panes {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
 }
 
-.itemHome__objectives--item {
-  margin-bottom: 1rem;
-  background: var(--color-white);
+.pane {
+  @include bp('laptop-up') {
+    &.workbench-pane,
+    &.objective-pane:not(:last-child) {
+      min-width: 36rem;
 
-  > ul {
-    padding-bottom: 0.5rem;
+      max-width: 48rem;
+    }
+  }
+
+  @media screen and (min-width: 135rem) {
+    &.workbench-pane,
+    &.objective-pane {
+      max-width: 48rem;
+    }
+    &.key-result-pane {
+      min-width: 64rem;
+    }
+  }
+
+  @media screen and (min-width: 180rem) {
+    &.workbench-pane,
+    &.objective-pane {
+      max-width: 48rem;
+    }
+    &.key-result-pane {
+      min-width: 64rem;
+      max-width: 80rem;
+    }
   }
 }
 </style>

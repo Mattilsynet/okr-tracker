@@ -12,28 +12,35 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: |
             ~/cache
             !~/cache/exclude
             **/node_modules
             ~/.cache
+            ~/root/.cache/firebase/emulators
           key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Use Node.js ${{matrix.node-version}}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Use Java
+        uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0 # v3.13.0
+        with:
+          distribution: 'zulu'
+          java-version: '17.x'
 
       - name: npm install
         run: |
@@ -50,5 +57,6 @@ jobs:
       - name: npm test:unit
         run: |
           npm run test:unit
+          npm run test:unit:firestore
         env:
           CI: true

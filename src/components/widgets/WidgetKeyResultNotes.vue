@@ -1,5 +1,5 @@
 <template>
-  <widget :title="$t('keyResultsPage.notes.heading')" size="small">
+  <widget :title="$t('keyResultsPage.notes.heading')" size="small" collapsable>
     <div class="notes">
       <div v-if="editNotes" class="notes--margin-bottom">
         <label>
@@ -18,15 +18,15 @@
       </div>
 
       <div v-if="editNotes" class="notes__btn">
-        <button class="btn btn--ter" :disabled="!dirty || loading" @click="saveNotes">
-          {{ $t('keyResultPage.notes.save') }}
-        </button>
-        <button class="btn btn--ter" @click="closeNotes">{{ $t('btn.close') }}</button>
+        <btn-save :disabled="!dirty || loading" @click="saveNotes" />
+        <pkt-button skin="tertiary" @onClick="closeNotes">
+          {{ $t('btn.close') }}
+        </pkt-button>
       </div>
       <div v-else>
-        <button class="btn" @click="editNotes = !editNotes">
+        <pkt-button skin="secondary" @onClick="editNotes = !editNotes">
           {{ $t('btn.editNotes') }}
-        </button>
+        </pkt-button>
       </div>
     </div>
   </widget>
@@ -35,8 +35,11 @@
 <script>
 import { mapState } from 'vuex';
 import { marked } from 'marked';
+import { PktButton } from '@oslokommune/punkt-vue2';
 import dompurify from 'dompurify';
+import { BtnSave } from '@/components/generic/form';
 import KeyResult from '@/db/KeyResult';
+import Widget from './WidgetWrapper.vue';
 
 marked.setOptions({
   smartypants: true,
@@ -46,7 +49,9 @@ export default {
   name: 'WidgetKeyResultNotes',
 
   components: {
-    Widget: () => import('./WidgetWrapper.vue'),
+    BtnSave,
+    PktButton,
+    Widget,
   },
 
   data: () => ({
@@ -58,7 +63,7 @@ export default {
   }),
 
   computed: {
-    ...mapState(['activeKeyResult']),
+    ...mapState('okrs', ['activeKeyResult']),
   },
 
   watch: {
@@ -113,5 +118,6 @@ export default {
 .notes__btn {
   display: flex;
   flex-direction: row;
+  gap: 0.5rem;
 }
 </style>

@@ -1,37 +1,51 @@
 {
   "403": {
     "title": "Forbidden",
-    "body": "You do not have access to this resource.",
+    "body": "You do not have access to this page.",
     "linkText": "Go back to the front page"
   },
-  "404": {
+  "notFound": {
     "title": "Page not found",
-    "body": "This resource does not seem to exist.",
-    "linkText": "Go back to the front page"
+    "body": "This page doesn't seem to exist.",
+    "linkText": "Go back to the front page",
+    "linkTextAlt": "Go back to {page}",
+    "objectiveHeading": "Objective not found",
+    "objectiveBody": "This objective doesn't seem to exist.",
+    "keyResultHeading": "Key result not found",
+    "keyResultBody": "This key result doesn't seem to exist.",
+    "measurementHeading": "Measurement not found",
+    "measurementBody": "This measurement doesn't seem to exist."
   },
   "kpi": {
-    "add": "Add measurement",
-    "placeholderName": "New measurement",
     "currentValue": "Current value",
     "latestValueTitle": "Latest value per {formattedDate}",
     "progress": "Progress",
+    "value": "Value",
     "newValue": "New value",
     "editValue": "Edit value",
     "description": "Description",
-    "display": "Display",
+    "format": "Format",
+    "startValue": "Start value for display",
     "preferredTrend": "Trend",
     "inPeriod": "in period",
     "noChange": "no change",
     "ofTarget": "of the goal of",
-    "noData": "No data in chosen period",
+    "noData": "No registered values",
+    "noDataFiltered": "No data in chosen period",
     "noGraph": "Not enough data to display graph",
+    "archived": "This measurement is archived and no longer visible.",
     "formats": {
       "integer": "Integer",
       "percentage": "Percentage"
     },
+    "startValues": {
+      "zero": "Zero",
+      "min": "Lowest measured value"
+    },
     "trendOptions": {
       "increase": "Increasing (high numbers preferred)",
-      "decrease": "Decreasing (low numbers preferred)"
+      "decrease": "Decreasing (low numbers preferred)",
+      "neutral": "Indifferent (all numbers are equally preferred)"
     },
     "updateFrequency": {
       "label": "Update frequency",
@@ -48,7 +62,7 @@
     "types": {
       "plain": {
         "label": "Measurement",
-        "description": "A measurement that the team or department whishes to keep an eye on. These are only displayed under the same item's measurement tab."
+        "description": "A measurement that the team or department wishes to keep an eye on. These are only displayed under the same item's measurement tab."
       },
       "keyFigure": {
         "label": "Key figure",
@@ -59,15 +73,19 @@
         "description": "The measurement is considered especially important as an indicator of achievement. If the measurement is registered for a product, it is also displayed as a result indicator for the parent department."
       }
     },
-    "heading": "Measurements",
     "itemRowError": "error",
     "help": {
       "updates": "Measurements can be updated both manually through the OKR Tracker and automatically using a Google Sheets- or API-integration. Note that it is only possible to register a single value within a day. Read more about creating and updating measurements {readMoreLink} (in Norwegian).",
       "readMoreHere": "here",
-      "apiProgress": "New measurements can be registered with {apiLink} calls, for instance by using curl as shown below."
+      "apiProgress": "New measurements can be registered with {apiLink} calls, for instance by using curl as shown below.",
+      "resultIndicatorWarning": "Result indicators are considered indicators of the organization's effect and target achievement, and should therefore be clarified with the organization's management before creation."
     },
     "automation": {
-      "radio": "Fetch values automatically from a spreadsheet (Google Sheets)?"
+      "title": "Automated progression",
+      "error": "An error has occurred while updating progression for this measurement.",
+      "radio": "Fetch values automatically from a spreadsheet (Google Sheets)?",
+      "reviewSettings": "Please review {0}.",
+      "automationLink": "the settings for automated progression"
     },
     "goals": {
       "goal": "Goal",
@@ -76,12 +94,13 @@
       "set": "Set goals",
       "edit": "Edit goals",
       "the": "the goal",
-      "help": "Measurements can have goals for specific periods. As of now, only goals for result indicators are shown, but this is subject to change.",
+      "help": "Measurements can have progression goals for specific periods. These are drawn in the diagram together with the progression graph.",
       "goalTitle": "Goal for {formattedDateRange}"
     }
   },
   "fields": {
     "email": "Email",
+    "emails": "Email addresses",
     "uid": "Unique ID",
     "name": "Name",
     "missionStatement": "Mission statement",
@@ -102,13 +121,13 @@
     "organization": "Organization",
     "date": "Date",
     "password": "Password",
-    "secret": "API Secret",
     "comment": "Comment",
     "format": "Display",
     "timestamp": "Timestamp",
     "preferredTrend": "Trend",
     "updateFrequency": "Update frequency",
-    "language": "Language"
+    "language": "Language",
+    "kpiType": "Type"
   },
   "validation": {
     "alpha": "May only contain alphabetic characters",
@@ -138,7 +157,8 @@
     "size": "Must be less than {size}KB",
     "double": "Must be a valid decimal",
     "positiveNotZero": "Must be a valid value",
-    "decimal": "Must be a decimal"
+    "decimal": "Must be a decimal",
+    "optional": "Optional"
   },
   "general": {
     "appName": "OKR-tracker",
@@ -146,14 +166,15 @@
     "general": "General",
     "OKRs": "OKRs",
     "OKRsLong": "Objectives and Key results",
+    "OKRsLonger": "Objectives and Key results for {name}",
+    "KPI": "Measurement",
     "KPIs": "Measurements",
-    "team": "Team",
+    "KPIsLong": "Measurements for {name}",
     "project": "OKR",
     "loading": "Loading ...",
     "owner": "Mattilsynet",
     "help": "Help",
     "admin": "Admin",
-    "administration": "Administration",
     "superAdmin": "Super admin",
     "signOut": "Sign out",
     "createdBy": "Created by",
@@ -168,13 +189,16 @@
     "keyResults": "Key results",
     "success": "Success",
     "objective": "Objective",
+    "objectiveBy": "Objective by {owner}",
+    "selectObjectivesInPeriod": "Select all objectives in this period",
+    "noObjectivesInPeriod": "No objectives in this period",
     "keyResult": "Key result",
     "period": "Period",
     "frontPage": "Front page",
     "signIn": "Please sign in",
     "orgs": "Organizations",
-    "emptyHome": "Please pick an organization.",
-    "api": "API",
+    "api": "API documentation",
+    "integrations": "Integrations",
     "resultIndicator": "Result indicator",
     "keyFigures": "Key figures",
     "otherMeasurements": "Other measurements",
@@ -183,19 +207,33 @@
     "selectRange": "Select a start and end date",
     "formErrors": "The form contains errors that must be corrected.",
     "displayedAs": "Displayed as: ",
-    "today": "Today"
+    "today": "Today",
+    "view": "View",
+    "step": "Step {step} of {steps}",
+    "or": "or",
+    "shortcuts": "Shortcuts",
+    "graph": "Graph",
+    "error": "Error",
+    "unknown": "unknown"
+  },
+  "home": {
+    "welcome": "Welcome to {appName}!",
+    "changeOrganization": "Change organization"
   },
   "about": {
     "about": "About",
+    "members": "Members",
     "aboutOrganization": "About the organization",
     "aboutDepartment": "About the department",
-    "aboutProduct": "About the product"
+    "aboutProduct": "About the product",
+    "organizationChildren": "Departments in the organization",
+    "departmentChildren": "Teams in the department"
   },
   "btn": {
     "close": "Close",
     "save": "Save",
-    "saveChanges": "Save changes",
     "add": "Add",
+    "remove": "Remove",
     "editNotes": "Change notes",
     "addOrganization": "Add organization",
     "addProduct": "Add product",
@@ -203,18 +241,31 @@
     "acceptRequest": "Grant access",
     "rejectRequest": "Delete request",
     "deleteUser": "Delete user",
+    "cancel": "Cancel",
     "create": "Create",
+    "continue": "Continue",
+    "complete": "Complete",
+    "back": "Go back",
+    "createObjective": "Create objective",
+    "updateObjective": "Update objective",
+    "createKeyResult": "Create key result",
+    "updateKeyResult": "Update key result",
+    "addKeyResult": "Add new key results",
+    "addKeyResults": "Add key results",
     "delete": "Delete",
     "editItem": "Change «{item}»",
+    "download": "Download",
     "upload": "Upload",
     "minimize": "Minimize",
     "expand": "Expand",
     "restore": "Restore",
     "confirmDelete": "Confirm delete",
     "reset": "Reset",
-    "showMore": "Show more",
+    "showMore": "Show all",
     "syncData": "Synchronize data",
-    "moreDetails": "More details"
+    "moreDetails": "More details",
+    "archiveObjective": "Archive objective",
+    "archiveKeyResult": "Archive key result"
   },
   "login": {
     "login": "Sign in",
@@ -243,7 +294,7 @@
       "department": "Created new department. Please wait, you will be redirected in 5 seconds",
       "keyResult": "Created new key result",
       "period": "Created new period",
-      "organization": "Created new organisation. Please wait, you will be redirected in 5 seconds",
+      "organization": "Created new organization. Please wait, you will be redirected in 5 seconds",
       "kpi": "Created new measurement",
       "progress": "Created new value"
     },
@@ -298,15 +349,19 @@
     "description": "Description",
     "startValue": "Start value",
     "targetValue": "Target value",
+    "progression": "Key result progression:",
     "unit": "Unit of measurement",
+    "defaultUnit": "percent",
     "newValue": "New value",
     "editValue": "Edit value",
+    "registeredValues": "Registered values",
     "automation": {
       "header": "Automatic progress registration (Google Sheets)",
       "googleSheetUrl": "Google Sheets URL",
       "googleSheetUrlHelp": "The complete Google Sheets URL",
       "sheetsTab": "Tab",
-      "sheetsTabHelp": "Same as the tab name in Google Sheets",
+      "sheetsTabPlaceholder": "Sheet1",
+      "sheetsTabHelp": "The tab name in Google Sheets",
       "sheetsCell": "Cell",
       "sheetsCellHelp": "E.g. «A12»",
       "testConnection": "Save and test connection"
@@ -314,14 +369,16 @@
     "registerProgression": {
       "value": "Value"
     },
-    "commentPlaceholder": "Dette er en kommentar...",
+    "commentPlaceholder": "This is a comment...",
     "updateValue": "Update value",
     "dateAndTime": "Date and time",
-    "addComment": "Add comment (optional)",
     "chooseDate": "Select date",
     "belongsTo": "Related objective",
     "numberOfUpdates": "Update count",
-    "weight": "Weight",
+    "weight": {
+      "label": "Weight",
+      "help": "Progression for each key result is by default weighted equally (1) when calculating the overall progression for an objective. It is possible to override this for each key result individually by changing the value below."
+    },
     "automatic": "Automatic",
     "autoHelpText": "The value for this key result gets updated automatically from Google Sheets.",
     "autoError": "Issue fetching data from Google Sheets:",
@@ -329,32 +386,43 @@
       "radio": "Update via API?",
       "tooltip": "Toggle this if you have plans to update your Key Results yourself via the OKR-tracker API - you can still update manually as well"
     },
-    "apiAndKeyRes": "We do not recommend toggling both at the same time. This may create problem your Key Result progression"
+    "apiAndKeyRes": "We do not recommend toggling both at the same time. This may create problem your Key Result progression",
+    "created": "The key result was created!",
+    "updated": "The key result was updated!",
+    "edit": "Edit key result"
   },
   "objective": {
     "period": "Period",
-    "progression": "Progress",
+    "progressionTitle": "Objective progression:",
+    "owner": "Owner",
+    "contributors": "Contributors",
     "weight": "Weight",
     "change": "Change objective",
     "add": "Add objective",
     "createdBy": "Created by",
     "editedBy": "Changed by",
     "created": "Created",
-    "edited": "Changed"
+    "edited": "Changed",
+    "updated": "The objective was changed!",
+    "movedWarning": "{activeItem} does not currently have any key results attached to this objective. When this objective is closed, it will also be hidden from this timeline. You can add a new key result now, and become a contributor, or later through {ownerLink}."
   },
   "period": {
     "choosePeriod": "Choose period",
     "dateRange": "Start and end dates",
     "sixmonths": "Past 6 months",
     "year": "So far this year",
-    "all": "From first measurement",
+    "all": "Everything",
     "thisQuarter": "This quarter",
     "previousQuarter": "Previous quarter"
+  },
+  "workbench": {
+    "selectedObjectives": "Selected objectives",
+    "progressionTitle": "Overall progression based on selected objectives:"
   },
   "tooltip": {
     "openMenu": "Open menu",
     "keyResultValue": "Insert new value",
-    "changeView": "Change view to {view}",
+    "changeView": "View: {view}",
     "editProgress": "Edit value",
     "deleteProgress": "Delete value",
     "isMember": "Member of team",
@@ -362,13 +430,48 @@
     "periodEnd": "You are not allowed to edit after a period has ended",
     "copyToClipboard": "Copy to the clipboard"
   },
-  "document": {
-    "mission": "Mission statement"
-  },
   "admin": {
-    "apiSecret": "If you are using the API to update key results and/or measurements, you need to write an API Secret UUID here for the API call header (okr-team-secret)",
-    "curlHelp": "Push updates via {apiLink}, i.e. using curl.",
-    "apiDocs": "API documentation",
+    "item": {
+      "change": "Edit {name}",
+      "updated": "{name} was updated!",
+      "delete": "Delete {name}",
+      "slugChangeInfo": "When changing the name of this item, the address to it might also change. In that case you will be automatically redirected after saving the form.",
+      "redirectInfo": "You will be redirected in {count} seconds."
+    },
+    "objective": {
+      "new": "New objective",
+      "created": "Objective was created!",
+      "updated": "Objective was updated!",
+      "change": "Edit objective",
+      "delete": "Delete objective",
+      "useLastPeriod": "Set to last used period:",
+      "level": {
+        "label": "Display level",
+        "help": "The objective will be displayed on the timeline of {owner} (default).",
+        "helpLift": "The objective will be displayed on the timeline of both {newOwner} and {owner}. It will remain on the latter's timeline as long as at least one key result from {owner} is retained.\n\nMembers in {owner} will no longer be able to edit this objective, except for adding or removing their own key results.",
+        "helpForeign": "The objective is displayed on the timeline of {owner} and the timelines of the following contributors: {contributors}. The display level cannot be changed for objectives with external contributors.",
+        "liftWarning1": "This change cannot be reverted.",
+        "liftWarning2": "You will no longer be able to edit the objective since you aren't a member of {newOwner}, but you will still be able to add key results to the objective."
+      }
+    },
+    "keyResult": {
+      "new": "New key result",
+      "created": "Key result was created!",
+      "updated": "Key result was updated!",
+      "change": "Edit key result",
+      "delete": "Delete key result",
+      "owner": {
+        "label": "Responsible team",
+        "help": "The team responsible for following up on this key result."
+      }
+    },
+    "measurement": {
+      "new": "New measurement",
+      "created": "Measurement created!",
+      "updated": "Measurement updated!",
+      "change": "Edit measurement",
+      "delete": "Delete measurement"
+    },
     "department": {
       "picture": "Image",
       "create": "Create new department",
@@ -409,8 +512,7 @@
     "change": "Update key result",
     "add": "Add key result",
     "notes": {
-      "empty": "Notes can only be seen by team members",
-      "save": "Save notes"
+      "empty": "Notes can only be seen by team members"
     },
     "filter": "Filter"
   },
@@ -419,8 +521,9 @@
     "toc": "Content"
   },
   "view": {
-    "compact": "Compact",
-    "details": "Details"
+    "details": "Details",
+    "timeline": "Timeline",
+    "list": "List"
   },
   "keyResultsPage": {
     "notes": {
@@ -444,43 +547,35 @@
       "body": "Oops! Could not find any key results.",
       "linkText": "Create a key result"
     },
-    "noResultIndicators": {
-      "heading": "No result indicators",
-      "body": "Oops! Could not find any result indicators.",
-      "linkText": "Create a result indicator"
-    },
-    "noKeyFigures": {
-      "heading": "No key figures",
-      "body": "Oops! Could not find any key figures.",
-      "linkText": "Create a key figure"
-    },
-    "itemAdmin": {
-      "keyResult": "No key results for selected objective",
-      "objective": "No objectives for selected period",
-      "period": "No periods"
-    },
     "noKPIs": {
       "heading": "No measurements",
       "body": "Oops! Could not find any measurements.",
-      "adminBody": "Add measurement that automatically fetches data from Google Sheets.",
-      "linkText": "Create a measurement"
+      "adminBody": "Add measurements that show what you have accomplished!",
+      "buttonText": "Create a measurement"
     },
-    "noPeriods": {
-      "heading": "Empty?",
-      "body": "It looks like there are no objectives and key results here ...",
-      "buttonText": "Create objectives and key results"
+    "noObjectives": {
+      "heading": "No objectives here!",
+      "body": "It looks like there are no objectives and key results here ..."
     },
-    "team": {
-      "body": "Team Ninja much?",
-      "heading": "No team members"
+    "noObjectivesInPeriod": {
+      "heading": "No objectives in selected period",
+      "body": "No objectives registered within the selected period."
     }
   },
   "archived": {
     "heading": "Archived",
-    "body": "This object is archived and is hidden. You may change details before restoring it."
+    "body": {
+      "objective": "This objective is archived and is no longer shown in the list of objectives.",
+      "keyResult": "This key result is archived and is no longer shown in the list of key results.",
+      "organization": "This organization is archived and no longer visible.",
+      "department": "This department is archived and no longer visible.",
+      "product": "This product is archived and no longer visible."
+    },
+    "restoreText": "If you miss it, just restore it."
   },
   "sheets": {
     "infoText": "Note! The following address must be given read access to the Google Sheets document:",
+    "400": "Couldn't read any data. Is the Google Sheets tab name correct?",
     "403": "The system doesn't have read access to the Google Sheets document.",
     "404": "Could not find the Google Sheets document. Wrong URL?",
     "noDataInCell": "Cell {cell} is empty."
@@ -498,7 +593,6 @@
       "value": "Value",
       "date": "Date",
       "comment": "Comment",
-      "comment_optional": "Comment (optional)",
       "actions": "Actions",
       "time": "Time",
       "changedBy": "Last edited by",
@@ -521,7 +615,6 @@
     "hasAdmin": "Has admin rights for some organizations",
     "myProducts": "My affiliations",
     "products": "Products",
-    "access": "Access",
     "position": {
       "groups": {
         "developers": "Developers",
@@ -559,7 +652,7 @@
       "principalEngineer": "Principal Engineer",
       "legalAdvisor": "Legal advisor",
       "itCustodian": "IT-Custodian",
-      "hr": "HR og personnel management",
+      "hr": "HR and personnel management",
       "hardwareDeveloper": "Hardware developer",
       "humanResourcesManager": "Human resources manager",
       "dataEngineer": "Data engineer",
@@ -571,19 +664,6 @@
       "storyteller": "Storyteller"
     }
   },
-  "progress": {
-    "title": "Progress {progress}",
-    "done": "done",
-    "remaining": "{unit} remaining",
-    "remainingOf": "of {progress}",
-    "complete": "{progress}% complete",
-    "completedMessages": {
-      "1": "You guys are nailing it!",
-      "2": "Well done, guys!",
-      "3": "Wohoo! 100%",
-      "4": "You did it! Awesome!"
-    }
-  },
   "dashboard": {
     "problemDescription": "Problem description",
     "targetAudience": "Target audience",
@@ -591,8 +671,52 @@
     "effect": "Effect",
     "noRIs": "The department doesn't have any result indicators.",
     "downloadOptions": {
-      "png": "Image (.png)",
-      "csv": "Raw data (.csv)"
+      "png": "Download graph as image (.png)",
+      "csv": "Download raw data (.csv)"
+    }
+  },
+  "integration": {
+    "info": "Our API offers endpoints to automate updating of key results and measurements. In order to make use of the API, an API client must be created. For each client, a unique ID and secret is generated which must be added as request headers ({clientIdHeader}, {clientSecretHeader}) to each API call. This in addition to a separate API key ({apiKeyHeader}). It is recommended to create a separate client for each application that integrates with the API. This makes it easier to keep track of each application and secrets in use.",
+    "placeholderTitle": "New client",
+    "clientId": "Client ID",
+    "clientSecret": "Secret",
+    "action": {
+      "add": "Create new client",
+      "edit": "Edit client",
+      "delete": "Delete client",
+      "rotate": "Rotate secret",
+      "confirmRotate": "Confirm rotate"
+    },
+    "tag": {
+      "created": "Created {when} by {name}",
+      "edited": "Last edited {when} by {name}",
+      "lastRotated": "Last rotated {when}",
+      "lastActivity": "Last active {when}",
+      "noActivity": "No activity seen yet"
+    },
+    "empty": {
+      "heading": "No clients",
+      "body": "Add one or more clients here in order to make use of our API. This makes it easy to automate updating of key results and/or measurements."
+    },
+    "toast": {
+      "add": "New client created",
+      "addError": "Could not create new client",
+      "update": "The client was updated",
+      "updateError": "Could not update the client",
+      "delete": "The client was deleted",
+      "deleteError": "Could not delete the client",
+      "rotate": "The secret was rotated",
+      "rotateError": "Could not rotate the secret"
+    },
+    "warning": {
+      "secret": "The secret above must be copied and stored in a safe location. It's only shown this one time. It's OK, {closeLink}!",
+      "secretCloseText": "I'm done",
+      "delete": "When deleting, all running applications which uses this client will stop working.",
+      "rotate": "When rotating, all running applications which uses the old secret will stop working.",
+      "deprecation": "It is no longer possible to add/edit the API secret here. Please visit the 'integrations' tab in the menu to create a new API client. The old secret will still work for the time being:"
+    },
+    "error": {
+      "loading": "Could not fetch clients: {error}."
     }
   },
   "languages": {

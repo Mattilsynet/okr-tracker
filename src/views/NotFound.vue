@@ -1,26 +1,20 @@
 <template>
-  <div>
-    <empty-state :icon="'meh'" :heading="$t('404.title')" :body="$t('404.body')">
-      <router-link class="btn btn--ter" :to="{ name: 'Home' }">
-        {{ $t('404.linkText') }}
-      </router-link>
-    </empty-state>
-  </div>
+  <not-found-page back-to="Home" />
 </template>
 
 <script>
 import i18n from '@/locale/i18n';
-import EmptyState from '@/components/EmptyState.vue';
+import NotFoundPage from '@/components/pages/NotFoundPage.vue';
 
 export default {
   name: 'NotFound',
   components: {
-    EmptyState,
+    NotFoundPage,
   },
 
   metaInfo() {
     return {
-      title: `${i18n.t('404.title')} | ${i18n.t('general.project')}`,
+      title: `${i18n.t('notFound.title')} | ${i18n.t('general.project')}`,
     };
   },
 };

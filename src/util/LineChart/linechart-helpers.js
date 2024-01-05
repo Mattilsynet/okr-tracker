@@ -15,8 +15,8 @@ const LEGEND_LABEL_SPACING = 10;
 const Tooltip = Vue.extend(IndicatorTooltip);
 
 export const GRAPH_COLORS = {
-  valueLine: 'var(--color-blue-light)',
-  targetLine: 'var(--color-green)',
+  valueLine: 'var(--graph-value-line, var(--color-blue-light))',
+  targetLine: 'var(--graph-target-line, var(--color-green))',
 };
 
 export function initSvg(svg) {
@@ -46,7 +46,7 @@ export function initSvg(svg) {
 function styleAxis(el) {
   el.attr('stroke-opacity', 0.6)
     .attr('font-size', 14)
-    .attr('font-family', '"OsloSans", Helvetica, Arial, sans-serif')
+    .attr('font-family', '"Oslo Sans", Helvetica, Arial, sans-serif')
     .attr('color', 'var(--color-grayscale-70)');
 }
 
@@ -118,7 +118,7 @@ export function populateLegend(el) {
     .attr('dy', '.1em')
     .style('text-anchor', 'start')
     .style('font-size', '14px')
-    .style('font-family', '"OsloSans", Helvetica, Arial, sans-serif')
+    .style('font-family', '"Oslo Sans", Helvetica, Arial, sans-serif')
     .style('fill', 'var(--color-grayscale-70)');
 
   item.attr('transform', (d, i) => {

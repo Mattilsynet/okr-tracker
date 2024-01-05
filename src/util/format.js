@@ -4,7 +4,7 @@ import { format, parseISO, formatISO } from 'date-fns';
 export const dateLong = (d) => format(d, 'PPP');
 export const dateLongCompact = (d) => format(d, 'PP');
 export const dateShort = (d) => format(d, 'P');
-export const dateMonthYear = (d) => format(d, 'MMMM y');
+export const dateExtraShort = (d) => format(d, 'dd.MM.yy');
 export const dateTimeShort = (d) => format(d, 'Pp');
 export const dateTimeLong = (d) => format(d, 'PPPp');
 
@@ -17,7 +17,7 @@ export function periodDates({ startDate, endDate }, strategy = dateLong) {
     endDate instanceof Date ? endDate : endDate.toDate(),
   ]
     .map(strategy)
-    .join(' – ');
+    .join('​–​');
 }
 
 export const parseDate = (d) => parseISO(d);

@@ -1,7 +1,22 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+
+import Admin from '@/views/Admin/Admin.vue';
+import AdminWrapper from '@/views/Admin/AdminWrapper.vue';
+import CreateDepartment from '@/views/Admin/CreateDepartment.vue';
+import CreateOrganization from '@/views/Admin/CreateOrganization.vue';
+import CreateProduct from '@/views/Admin/CreateProduct.vue';
+import Forbidden from '@/views/Forbidden.vue';
+import Help from '@/views/Help.vue';
 import Home from '@/views/Home.vue';
-import Api from '@/views/Api.vue';
+import ItemAbout from '@/views/Item/ItemAbout.vue';
+import ItemMeasurements from '@/views/Item/ItemMeasurements.vue';
+import ItemOKRs from '@/views/Item/ItemOKRs.vue';
+import ItemWrapper from '@/views/Item/ItemWrapper.vue';
+import Login from '@/views/Login.vue';
+import NotFound from '@/views/NotFound.vue';
+import RequestAccess from '@/views/RequestAccess.vue';
+
 import * as routerGuards from './router-guards';
 
 Vue.use(Router);
@@ -16,68 +31,60 @@ const routes = [
   {
     path: '/api',
     name: 'Api',
-    component: Api,
+    component: () => import('@/views/Api.vue'),
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/Login.vue'),
+    component: Login,
     beforeEnter: routerGuards.login,
   },
   {
     path: '/request-access',
     name: 'request-access',
-    component: () => import('@/views/RequestAccess.vue'),
+    component: RequestAccess,
     beforeEnter: routerGuards.requestAccess,
   },
   {
     path: '/403',
     name: 'Forbidden',
-    component: () => import('@/views/Forbidden.vue'),
-  },
-  {
-    path: '/404',
-    name: 'Not found',
-    component: () => import('@/views/NotFound.vue'),
+    component: Forbidden,
   },
   {
     path: '/admin',
     beforeEnter: routerGuards.admin,
-    component: () => import('@/views/Admin/AdminWrapper.vue'),
+    component: AdminWrapper,
     children: [
       {
         path: '',
         name: 'Admin',
-        component: () => import('@/views/Admin/Admin.vue'),
+        component: Admin,
       },
       {
         path: 'create-organization',
         name: 'CreateOrganization',
-        component: () => import('@/views/Admin/CreateOrganization.vue'),
+        component: CreateOrganization,
       },
       {
         path: 'create-department',
         name: 'CreateDepartment',
-        component: () => import('@/views/Admin/CreateDepartment.vue'),
+        component: CreateDepartment,
       },
       {
         path: 'create-product',
         name: 'CreateProduct',
-        component: () => import('@/views/Admin/CreateProduct.vue'),
+        component: CreateProduct,
       },
     ],
   },
   {
     path: '/help',
     name: 'Help',
-    component: () => import('@/views/Help.vue'),
+    component: Help,
   },
   {
     path: '/:slug',
-    components: {
-      default: () => import('@/views/Item/ItemWrapper.vue'),
-      SubNav: () => import('@/components/Navigation/ItemTabBar.vue'),
-    },
+    component: ItemWrapper,
     beforeEnter: routerGuards.itemCommon,
     children: [
       {
@@ -87,17 +94,52 @@ const routes = [
       {
         path: 'okr',
         name: 'ItemHome',
-        component: () => import('@/views/Item/ItemOKRs.vue'),
+        component: ItemOKRs,
+        beforeEnter: routerGuards.itemOKRs,
+        beforeRouteUpdate: routerGuards.itemOKRs,
+        children: [
+          {
+            path: 'o/:objectiveId',
+            name: 'ObjectiveHome',
+          },
+          {
+            path: 'o/:objectiveId/k/:keyResultId',
+            name: 'KeyResultHome',
+            beforeEnter: routerGuards.keyResultHome,
+          },
+        ],
       },
       {
-        path: 'measurements',
+        path: 'measurements/:kpiId?',
         name: 'ItemMeasurements',
-        component: () => import('@/views/Item/ItemMeasurements.vue'),
+        component: ItemMeasurements,
         beforeEnter: routerGuards.itemMeasurements,
       },
+      {
+        path: 'about',
+        name: 'ItemAbout',
+        component: ItemAbout,
+      },
+      {
+        path: 'integrations',
+        name: 'ItemIntegrations',
+        component: () => import('@/views/Item/ItemIntegrations.vue'),
+        beforeEnter: routerGuards.itemIntegrations,
+      },
       /*
-       * Alias for `measurements` -- redirect from the old `dashboard` path
-       * still in case people have bookmarked it.
+       * Redirect old paths for objective and key result details.
+       */
+      {
+        path: 'o/:objectiveId',
+        redirect: (to) => ({ name: 'ObjectiveHome', params: to.params }),
+      },
+      {
+        path: 'k/:keyResultId',
+        redirect: (to) => ({ name: 'KeyResultHome', params: to.params }),
+      },
+      /*
+       * Aliases for `measurements` -- redirect from the old `dashboard` and
+       * KPI details paths in case people have them bookmarked.
        */
       {
         path: 'dashboard',
@@ -105,35 +147,16 @@ const routes = [
         redirect: { name: 'ItemMeasurements' },
       },
       {
-        path: 'about',
-        name: 'ItemAbout',
-        component: () => import('@/views/Item/ItemAbout.vue'),
-      },
-      {
-        path: 'admin',
-        name: 'ItemAdmin',
-        component: () => import('@/views/ItemAdmin/ItemAdminWrapper.vue'),
-        beforeEnter: routerGuards.itemAdmin,
-      },
-      {
-        path: 'k/:keyResultId',
-        name: 'KeyResultHome',
-        component: () => import('@/views/KeyResultHome.vue'),
-        beforeEnter: routerGuards.keyResultHome,
-      },
-      {
-        path: 'o/:objectiveId',
-        name: 'ObjectiveHome',
-        component: () => import('@/views/ObjectiveHome.vue'),
-        beforeEnter: routerGuards.objectiveHome,
-      },
-      {
         path: 'kpi/:kpiId',
         name: 'KpiHome',
-        component: () => import('@/views/KpiHome.vue'),
-        beforeEnter: routerGuards.kpiHome,
+        redirect: { name: 'ItemMeasurements' },
       },
     ],
+  },
+  {
+    path: '*',
+    name: 'NotFound',
+    component: NotFound,
   },
 ];
 

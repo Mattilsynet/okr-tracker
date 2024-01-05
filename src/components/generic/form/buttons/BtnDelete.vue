@@ -1,63 +1,78 @@
 <template>
-  <v-popover offset="0" placement="top">
-    <btn
-      :form="form"
-      :icon="icon"
-      :label="label"
-      :hide-label="hideLabel"
+  <v-popover ref="popover" offset="0" placement="top" :disabled="$attrs?.disabled">
+    <pkt-button
+      v-bind="$attrs"
+      skin="tertiary"
+      :text="text"
       :variant="variant"
-      :disabled="disabled"
+      :icon-name="iconName"
     />
 
-    <template slot="popover">
-      <btn
-        variant="tertiary"
-        class="btn--negative"
-        :label="confirmLabel"
-        @click="$emit('click', $event)"
-      />
+    <template v-if="!$attrs?.disabled" slot="popover">
+      <div data-mode="dark">
+        <p v-if="confirmHelp" class="mb-size-16">{{ confirmHelp }}</p>
+        <pkt-button
+          type="button"
+          skin="secondary"
+          :size="$attrs?.size || 'medium'"
+          :text="confirmText"
+          @onClick="confirm"
+        />
+      </div>
     </template>
   </v-popover>
 </template>
 
 <script>
+import { PktButton } from '@oslokommune/punkt-vue2';
 import { VPopover } from 'v-tooltip';
-import Btn from './BtnBase.vue';
 
 export default {
   name: 'BtnDelete',
 
   components: {
+    PktButton,
     VPopover,
-    Btn,
   },
 
-  extends: Btn,
+  inheritAttrs: false,
 
   props: {
-    label: {
+    text: {
       type: String,
       required: false,
       default() {
         return this.$t('btn.delete');
       },
     },
-    confirmLabel: {
+    confirmText: {
       type: String,
       required: false,
       default() {
         return this.$t('btn.confirmDelete');
       },
     },
+    confirmHelp: {
+      type: String,
+      required: false,
+      default: null,
+    },
     variant: {
       type: String,
       required: false,
-      default: 'tertiary',
+      default: 'icon-left',
     },
-    icon: {
+    iconName: {
       type: String,
       required: false,
-      default: 'trash',
+      default: 'trash-can',
+    },
+  },
+
+  methods: {
+    confirm(e) {
+      this.$emit('click', e);
+      this.$refs.popover.hide();
     },
   },
 };

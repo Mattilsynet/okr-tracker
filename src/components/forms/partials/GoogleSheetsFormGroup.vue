@@ -9,33 +9,29 @@
       type="url"
     >
       <template #help>
-        <span
-          class="form-help"
-          v-html="$t('keyResult.automation.googleSheetUrlHelp')"
-        ></span>
+        <span v-html="$t('keyResult.automation.googleSheetUrlHelp')" />
       </template>
     </form-component>
 
-    <div class="form-row">
+    <div class="pkt-grid">
       <form-component
         v-model="sheetNameModel"
+        class="pkt-cell pkt-cell--span12 pkt-cell--span6-tablet-up"
         input-type="input"
         name="sheetTab"
         :label="$t('keyResult.automation.sheetsTab')"
-        placeholder="Sheet1"
+        :placeholder="$t('keyResult.automation.sheetsTabPlaceholder')"
         rules="required"
         type="text"
       >
         <template #help>
-          <span
-            class="form-help"
-            v-html="$t('keyResult.automation.sheetsTabHelp')"
-          ></span>
+          <span v-html="$t('keyResult.automation.sheetsTabHelp')" />
         </template>
       </form-component>
 
       <form-component
         v-model="sheetCellModel"
+        class="pkt-cell pkt-cell--span12 pkt-cell--span6-tablet-up"
         input-type="input"
         name="sheetCell"
         :label="$t('keyResult.automation.sheetsCell')"
@@ -44,10 +40,7 @@
         type="text"
       >
         <template #help>
-          <span
-            class="form-help"
-            v-html="$t('keyResult.automation.sheetsCellHelp')"
-          ></span>
+          <span v-html="$t('keyResult.automation.sheetsCellHelp')" />
         </template>
       </form-component>
     </div>

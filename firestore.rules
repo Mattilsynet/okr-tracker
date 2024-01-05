@@ -31,27 +31,126 @@ service cloud.firestore {
 
       // Check if the document the user tries to access has an organization - this means that is is a product or department
       let hasOrgProperty = 'organization' in request.resource.data;
-      let isAdminFromOrgOfProdOrDep = userIsAdmin && hasOrgProperty && getAfter(request.resource.data.organization).data.id in userDoc.data.admin;
+      let isAdminFromOrgOfProdOrDep = userIsAdmin && hasOrgProperty && getAfter(request.resource.data.organization).id in userDoc.data.admin;
 
       // Check if the user has access to the document which is an organization (given that the first check is false)
-      let isAdminOfOrg = userIsAdmin && request.resource.data.id in userDoc.data.admin;
+      let isAdminOfOrg = userIsAdmin && request.resource.id in userDoc.data.admin;
 
       return isSignedIn() && (isAdminOfOrg || isAdminFromOrgOfProdOrDep);
     }
 
-    // Same as isMemberOfParent but to check if you are an admin instead of the organization the parent is a part of
+    //
+    // Return true if the current user is an admin of the organization that
+    // `document` belongs to.
+    //
+    // The document can belong to an organization either by a transitive link
+    // (`document` → `parent` → `organization`) or directly
+    // (`document` → `parent`).
+    //
     function isAdminOfParent(document, type) {
       let userDoc = getUserDoc();
       let userIsAdmin = isAdmin();
+      let item = getAfter(/databases/$(database)/documents/$(type)/$(document));
+      let parentDoc = getAfter(item.data.parent);
 
-      let parentDoc = getAfter(get(/databases/$(database)/documents/$(type)/$(document)).data.parent);
-
-      // Check if the parentDoc the user tries to access has an organization - this means that is is a product or department
+      // Check whether the parent of the document the user tries to access has
+      // an organization – this means that it is a product or department.
       let hasOrgDocumentInParent = 'organization' in parentDoc.data;
-      let isAdminFromOrgOfProdOrDep = userIsAdmin && hasOrgDocumentInParent && getAfter(parentDoc.data.organization).data.id in userDoc.data.admin;
+      let isAdminFromOrgOfProdOrDep = userIsAdmin && hasOrgDocumentInParent && getAfter(parentDoc.data.organization).id in userDoc.data.admin;
 
-      // Check if the user has access to the parentDoc which is an organization (given that the first check is false)
-      let isAdminOfParent = userIsAdmin && !isAdminFromOrgOfProdOrDep && parentDoc.data.id in userDoc.data.admin;
+      // Check whether the user has access to the parent, which is an
+      // organization (given that the first check is false).
+      let isAdminOfParent = userIsAdmin && !isAdminFromOrgOfProdOrDep && parentDoc.id in userDoc.data.admin;
+
+      return isSignedIn() && (isAdminFromOrgOfProdOrDep || isAdminOfParent);
+    }
+
+    //
+    // Return true if the current user is an admin of the organization that the
+    // document's `item` belongs to *after* performing the action.
+    //
+    function isAdminOfItemAfter(document, type) {
+      let userDoc = getUserDoc();
+      let userIsAdmin = isAdmin();
+      let item = getAfter(/databases/$(database)/documents/$(type)/$(document));
+      let itemDoc = getAfter(item.data.item);
+
+      // Check whether the item of the document the user tries to access has
+      // an organization – this means that it is a product or department.
+      let hasOrgDocumentInItem = 'organization' in itemDoc.data;
+      let isAdminFromOrgOfProdOrDep = userIsAdmin && hasOrgDocumentInItem && getAfter(itemDoc.data.organization).id in userDoc.data.admin;
+
+      // Check whether the user has access to the item, which is an
+      // organization (given that the first check is false).
+      let isAdminOfItem = userIsAdmin && !isAdminFromOrgOfProdOrDep && itemDoc.id in userDoc.data.admin;
+
+      return isSignedIn() && (isAdminFromOrgOfProdOrDep || isAdminOfItem);
+    }
+
+    //
+    // Return true if the current user is an admin of the organization that the
+    // document's `item` belongs to *before* performing the action.
+    //
+    function isAdminOfItemBefore(document, type) {
+      let userDoc = getUserDoc();
+      let userIsAdmin = isAdmin();
+      let item = get(/databases/$(database)/documents/$(type)/$(document));
+      let itemDoc = get(item.data.item);
+
+      // Check whether the item of the document the user tries to access has
+      // an organization – this means that it is a product or department.
+      let hasOrgDocumentInItem = 'organization' in itemDoc.data;
+      let isAdminFromOrgOfProdOrDep = userIsAdmin && hasOrgDocumentInItem && get(itemDoc.data.organization).id in userDoc.data.admin;
+
+      // Check whether the user has access to the item, which is an
+      // organization (given that the first check is false).
+      let isAdminOfItem = userIsAdmin && !isAdminFromOrgOfProdOrDep && itemDoc.id in userDoc.data.admin;
+
+      return isSignedIn() && (isAdminFromOrgOfProdOrDep || isAdminOfItem);
+    }
+
+    //
+    // Return true if the current user is an admin of the parent of the
+    // document's objective.
+    //
+    function isAdminOfObjectiveParent(document, type) {
+      let userDoc = getUserDoc();
+      let userIsAdmin = isAdmin();
+      let doc = getAfter(/databases/$(database)/documents/$(type)/$(document));
+      let objectiveDoc = getAfter(doc.data.objective);
+      let parentDoc = getAfter(objectiveDoc.data.parent);
+
+      // Check whether the parent of the document the user tries to access has
+      // an organization – this means that it is a product or department.
+      let hasOrgDocumentInParent = 'organization' in parentDoc.data;
+      let isAdminFromOrgOfProdOrDep = userIsAdmin && hasOrgDocumentInParent && getAfter(parentDoc.data.organization).id in userDoc.data.admin;
+
+      // Check whether the user has access to the parent, which is an
+      // organization (given that the first check is false).
+      let isAdminOfParent = userIsAdmin && !isAdminFromOrgOfProdOrDep && parentDoc.id in userDoc.data.admin;
+
+      return isSignedIn() && (isAdminFromOrgOfProdOrDep || isAdminOfParent);
+    }
+
+    //
+    // Return true if the current user is an admin of the parent of the
+    // document's objective *before* performing the action.
+    //
+    function isAdminOfObjectiveParentBefore(document, type) {
+      let userDoc = getUserDoc();
+      let userIsAdmin = isAdmin();
+      let doc = get(/databases/$(database)/documents/$(type)/$(document));
+      let objectiveDoc = get(doc.data.objective);
+      let parentDoc = get(objectiveDoc.data.parent);
+
+      // Check whether the parent of the document the user tries to access has
+      // an organization – this means that it is a product or department.
+      let hasOrgDocumentInParent = 'organization' in parentDoc.data;
+      let isAdminFromOrgOfProdOrDep = userIsAdmin && hasOrgDocumentInParent && get(parentDoc.data.organization).id in userDoc.data.admin;
+
+      // Check whether the user has access to the parent, which is an
+      // organization (given that the first check is false).
+      let isAdminOfParent = userIsAdmin && !isAdminFromOrgOfProdOrDep && parentDoc.id in userDoc.data.admin;
 
       return isSignedIn() && (isAdminFromOrgOfProdOrDep || isAdminOfParent);
     }
@@ -69,13 +168,75 @@ service cloud.firestore {
       return userIsTeamMember;
     }
 
-    // Is a member from the parent of the Objective/KeyResult/Period/KPI
+    //
+    // Return true if the current user is a member of `document.parent`.
+    //
     function isMemberOfParent(document, type) {
       let userRef = /databases/$(database)/documents/users/$(request.auth.token.email);
       let doc = getAfter(/databases/$(database)/documents/$(type)/$(document));
       let parentDoc = getAfter(doc.data.parent);
       let userIsMemberOfParent = userRef in parentDoc.data.team;
       return userIsMemberOfParent;
+    }
+
+    //
+    // Return true if the current user is a member of `document.parent`
+    // *before* performing the action.
+    //
+    function isMemberOfParentBefore(document, type) {
+      let userRef = /databases/$(database)/documents/users/$(request.auth.token.email);
+      let doc = get(/databases/$(database)/documents/$(type)/$(document));
+      let parentDoc = get(doc.data.parent);
+      let userIsMemberOfParent = userRef in parentDoc.data.team;
+      return userIsMemberOfParent;
+    }
+
+    //
+    // Return true if the `objective`'s parent is either `item` or its parent
+    // *after* performing the action.
+    //
+    function objectiveParentIsItemOrItemParent(document, type) {
+      let doc = getAfter(/databases/$(database)/documents/$(type)/$(document));
+
+      let itemDoc = getAfter(doc.data.item);
+      let objectiveDoc = getAfter(doc.data.objective);
+      let objectiveParentDoc = getAfter(objectiveDoc.data.parent);
+
+      let isProduct = 'department' in itemDoc.data;
+      let isDepartment = 'organization' in itemDoc.data;
+
+      let objectiveParentIsItemParent = (isProduct && getAfter(itemDoc.data.department) == objectiveParentDoc)
+          || (!isProduct && isDepartment && getAfter(itemDoc.data.organization) == objectiveParentDoc);
+
+      return objectiveParentDoc == itemDoc || objectiveParentIsItemParent;
+    }
+
+    //
+    // Return true if the current user is a member of `item` *after* performing
+    // the action.
+    //
+    function isMemberOfItemAfter(document, type) {
+      let userRef = /databases/$(database)/documents/users/$(request.auth.token.email);
+      let doc = getAfter(/databases/$(database)/documents/$(type)/$(document));
+
+      let itemDoc = getAfter(doc.data.item);
+      let isMemberOfItem = userRef in itemDoc.data.team;
+
+      return isMemberOfItem;
+    }
+
+    //
+    // Return true if the current user is a member of `item` *before*
+    // performing the action.
+    //
+    function isMemberOfItemBefore(document, type) {
+      let userRef = /databases/$(database)/documents/users/$(request.auth.token.email);
+      let doc = get(/databases/$(database)/documents/$(type)/$(document));
+
+      let itemDoc = get(doc.data.item);
+      let isMemberOfItem = userRef in itemDoc.data.team;
+
+      return isMemberOfItem;
     }
 
     function isSelf(document) {
@@ -143,22 +304,25 @@ service cloud.firestore {
     match /objectives/{document} {
       allow read: if isSignedIn();
       allow create: if isSuperAdmin() || isMemberOfParent(document, 'objectives') || isAdminOfParent(document, 'objectives');
-      allow update: if isSuperAdmin() || isMemberOfParent(document, 'objectives') || isAdminOfParent(document, 'objectives');
+      allow update: if isSuperAdmin() || isMemberOfParentBefore(document, 'objectives') || isAdminOfParent(document, 'objectives');
       allow delete: if isSuperAdmin();
+    }
+
+    match /objectiveContributors/{document} {
+      allow read: if isSignedIn();
+      allow create: if isSuperAdmin() || (isMemberOfItemAfter(document, 'objectiveContributors') && objectiveParentIsItemOrItemParent(document, 'objectiveContributors')) || (isAdminOfItemAfter(document, 'objectiveContributors') && isAdminOfObjectiveParent(document, 'objectiveContributors'));
+      allow delete: if isSuperAdmin() || isMemberOfItemBefore(document, 'objectiveContributors') || (isAdminOfItemBefore(document, 'objectiveContributors') && isAdminOfObjectiveParentBefore(document, 'objectiveContributors'));
     }
 
     match /periods/{document} {
       allow read: if isSignedIn();
-      allow create: if isSuperAdmin() || isMemberOfParent(document, 'periods') || isAdminOfParent(document, 'periods');
-      allow update: if isSuperAdmin() || isMemberOfParent(document, 'periods') || isAdminOfParent(document, 'periods');
-      allow delete: if isSuperAdmin();
     }
 
     match /kpis/{document} {
       allow read: if isSignedIn();
       allow create: if isSuperAdmin() || isMemberOfParent(document, 'kpis') || isAdminOfParent(document, 'kpis');
       allow update: if isSuperAdmin() || isMemberOfParent(document, 'kpis') || isAdminOfParent(document, 'kpis');
-      allow delete: if isSuperAdmin() || isMemberOfParent(document, 'kpis') || isAdminOfParent(document, 'kpis');
+      allow delete: if isSuperAdmin();
     }
 
     match /kpis/{document}/progress/{progress} {
@@ -173,6 +337,16 @@ service cloud.firestore {
       allow create: if isSuperAdmin() || isMemberOfParent(document, 'kpis') || isAdminOfParent(document, 'kpis');
       allow update: if isSuperAdmin() || isMemberOfParent(document, 'kpis') || isAdminOfParent(document, 'kpis');
       allow delete: if isSuperAdmin() || isMemberOfParent(document, 'kpis') || isAdminOfParent(document, 'kpis');
+    }
+
+    match /apiClients/{document} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin() || isMemberOfParent(document, 'apiClients') || isAdminOfParent(document, 'apiClients');
+
+      match /secrets/{key} {
+        allow read: if false;
+        allow write: if isSuperAdmin() || isMemberOfParent(document, 'apiClients') || isAdminOfParent(document, 'apiClients');
+      }
     }
 
     match /slugs/{document} {

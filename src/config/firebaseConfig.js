@@ -1,15 +1,15 @@
-import firebase from 'firebase/app';
-import 'firebase/storage';
-import 'firebase/firestore';
-import 'firebase/auth';
-import 'firebase/functions';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/storage';
+import 'firebase/compat/firestore';
+import 'firebase/compat/auth';
+import 'firebase/compat/functions';
 
 import { emulators } from '../../firebase.json';
 
 const firestoreEmulator = {
   host: `localhost:${emulators.firestore.port}`,
   ssl: false,
-  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: true,
   merge: true,
 };
 
@@ -41,7 +41,7 @@ const auth = firebase.auth();
 const functions = firebase.app().functions(import.meta.env.VITE_REGION);
 const { serverTimestamp, arrayRemove, arrayUnion } = firebase.firestore.FieldValue;
 
-if (import.meta.env.MODE === 'development' || window.Cypress) {
+if (import.meta.env.MODE === 'development') {
   db.settings(firestoreEmulator);
   functions.useEmulator('localhost', emulators.functions.port);
   auth.useEmulator(`http://localhost:${emulators.auth.port}`);

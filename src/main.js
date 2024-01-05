@@ -4,12 +4,8 @@ import Toasted from 'vue-toasted';
 import VTooltip from 'v-tooltip';
 import VueMeta from 'vue-meta';
 import VueFlatPickr from 'vue-flatpickr-component';
-import { ValidationProvider, ValidationObserver, extend, configure } from 'vee-validate';
-import { required, email, numeric, min, max } from 'vee-validate/dist/rules';
-import { ContentLoader } from 'vue-content-loader';
-
+import { ValidationProvider, ValidationObserver } from 'vee-validate';
 import { firestorePlugin } from 'vuefire';
-import { VueGriddle } from '@braid/griddle';
 
 import { PktIcon } from '@oslokommune/punkt-vue2';
 
@@ -18,12 +14,13 @@ import router from '@/router';
 import store from '@/store';
 import i18n from '@/locale/i18n';
 import Spinner from '@/components/VSpinner.vue';
+import PageLayout from '@/components/layout/PageLayout.vue';
 import FormComponent from '@/components/FormComponent.vue';
 
 import { auth } from './config/firebaseConfig';
+import configureFormValidation from './config/validation';
 
 // import plugin styles
-import '@fortawesome/fontawesome-free/css/all.css';
 import 'flatpickr/dist/flatpickr.css';
 
 import './styles/main.scss';
@@ -34,38 +31,38 @@ Vue.use(Toasted, {
   className: 'toast',
   duration: 3500,
 });
-Vue.use(VTooltip);
+Vue.use(VTooltip, {
+  defaultHtml: false,
+});
 Vue.use(VueMeta);
 Vue.use(firestorePlugin);
 Vue.use(VueFlatPickr);
 
+VueSelect.props.components.default = () => ({
+  Deselect: {
+    render: (createElement) => {
+      return createElement(PktIcon, { props: { name: 'close' } });
+    },
+  },
+  OpenIndicator: {
+    render: (createElement) => {
+      return createElement(PktIcon, { props: { name: 'chevron-thin-down' } });
+    },
+  },
+});
+
 // Global components
+Vue.component('PageLayout', PageLayout);
 Vue.component('VSelect', VueSelect);
-Vue.component('VueGriddle', VueGriddle);
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
 Vue.component('FormComponent', FormComponent);
-Vue.component('ContentLoader', ContentLoader);
 Vue.component('VSpinner', Spinner);
 Vue.component('PktIcon', PktIcon);
 
-/* eslint-disable */
-configure({
-  defaultMessage: (field, values) => {
-    values._field_ = i18n.t(`fields.${field}`);
-
-    return i18n.t(`validation.${values._rule_}`, values);
-  },
-});
-/* eslint-enable */
-
-extend('required', required);
-extend('email', email);
-extend('numeric', numeric);
-extend('min', min);
-extend('max', max);
-extend('decimal', (num) => typeof num === 'number');
-extend('positiveNotZero', (num) => typeof num === 'number' && num > 0);
+// Configure VeeValidate for form validation.
+// https://vee-validate.logaretm.com/v3/
+configureFormValidation();
 
 Vue.config.productionTip = false;
 

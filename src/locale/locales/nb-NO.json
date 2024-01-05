@@ -1,37 +1,51 @@
 {
   "403": {
     "title": "Ingen tilgang",
-    "body": "Du har ikke tilgang til denne ressursen.",
+    "body": "Du har ikke tilgang til denne siden.",
     "linkText": "Gå tilbake til forsiden"
   },
-  "404": {
+  "notFound": {
     "title": "Siden finnes ikke",
-    "body": "Denne ressursen ser ikke ut til å eksistere.",
-    "linkText": "Gå tilbake til forsiden"
+    "body": "Denne siden ser ikke ut til å eksistere.",
+    "linkText": "Gå tilbake til forsiden",
+    "linkTextAlt": "Gå tilbake til {page}",
+    "objectiveHeading": "Målet finnes ikke",
+    "objectiveBody": "Dette målet ser ikke ut til å eksistere.",
+    "keyResultHeading": "Nøkkelresultatet finnes ikke",
+    "keyResultBody": "Dette nøkkelresultatet ser ikke ut til å eksistere.",
+    "measurementHeading": "Målingen finnes ikke",
+    "measurementBody": "Denne målingen ser ikke ut til å eksistere."
   },
   "kpi": {
-    "add": "Legg til måling",
-    "placeholderName": "Ny måling",
     "currentValue": "Nåværende verdi",
     "latestValueTitle": "Siste verdi per {formattedDate}",
     "progress": "Progresjon",
+    "value": "Målepunkt",
     "newValue": "Legg til målepunkt",
     "editValue": "Endre målepunkt",
     "description": "Beskrivelse",
-    "display": "Visning",
+    "format": "Format",
+    "startValue": "Startverdi ved visning",
     "preferredTrend": "Ønsket trend",
     "inPeriod": "i perioden",
     "noChange": "ingen endring",
     "ofTarget": "av mål om",
-    "noData": "Ingen data i valgt periode",
+    "noData": "Ingen registrerte verdier",
+    "noDataFiltered": "Ingen data i valgt periode",
     "noGraph": "Ikke nok data til å vise graf",
+    "archived": "Denne målingen er arkivert og vil ikke lenger være synlig.",
     "formats": {
       "integer": "Heltall",
       "percentage": "Prosent"
     },
+    "startValues": {
+      "zero": "Null",
+      "min": "Lavest målte verdi"
+    },
     "trendOptions": {
       "increase": "Stigende (høyt tall er bra)",
-      "decrease": "Synkende (lavt tall er bra)"
+      "decrease": "Synkende (lavt tall er bra)",
+      "neutral": "Likegyldig (alle tall er like gode)"
     },
     "updateFrequency": {
       "label": "Oppdateringshyppighet",
@@ -59,15 +73,19 @@
         "description": "Målingen anses som en vesentlig indikator for måloppnåelse og fremheves særskilt. Dersom målingen registreres for et produkt, vises den også som del av produktområdets resultatindikatorer. Kan for eksempel være tillknyttet et tildelingsbrev eller andre styringsinstrumenter."
       }
     },
-    "heading": "Målinger",
     "itemRowError": "feil",
     "help": {
       "updates": "Målinger kan både oppdateres manuelt via OKR-trackeren og automatisk via av en Google Sheets- eller API-integrasjon. Merk at det kun er mulig å registrere ett målepunkt per døgn. Les mer om opprettelse og oppdatering av målinger {readMoreLink}.",
       "readMoreHere": "her",
-      "apiProgress": "Nye målepunkt kan også registreres via {apiLink}-kall, for eksempel ved bruk av curl som vist nedenfor."
+      "apiProgress": "Nye målepunkt kan også registreres via {apiLink}-kall, for eksempel ved bruk av curl som vist nedenfor.",
+      "resultIndicatorWarning": "Resultatindikatorer regnes som indikatorer på virksomhetens effekt og måloppnåelse, og bør derfor være avklart med virksomhetens ledelse før opprettelse."
     },
     "automation": {
-      "radio": "Hente måleverdier automatisk fra et regneark (Google Sheets)?"
+      "title": "Automatisert progresjon",
+      "error": "En feil har oppstått under oppdatering av progresjon for denne målingen.",
+      "radio": "Hente måleverdier automatisk fra et regneark (Google Sheets)?",
+      "reviewSettings": "Vennligst kontroller {0}.",
+      "automationLink": "innstillingene for automatisert progresjon"
     },
     "goals": {
       "goal": "Mål",
@@ -76,12 +94,13 @@
       "set": "Sett mål",
       "edit": "Endre mål",
       "the": "målet",
-      "help": "Målinger kan ha mål for bestemte perioder. Foreløpig vises kun mål for resultatindikatorer, men dette vil kunne endres på sikt.",
+      "help": "Målinger kan ha progresjonsmål for bestemte perioder. Disse tegnes opp i diagrammet sammen med progresjonsgrafen.",
       "goalTitle": "Mål for {formattedDateRange}"
     }
   },
   "fields": {
     "email": "E-post",
+    "emails": "E-postadresser",
     "uid": "Unik ID",
     "name": "Navn",
     "missionStatement": "Oppdragsbeskrivelse",
@@ -102,11 +121,13 @@
     "organization": "Organisasjon",
     "date": "Dato",
     "password": "Passord",
-    "secret": "API Hemmelighet",
     "comment": "Kommentar",
+    "format": "Visning",
+    "timestamp": "Timestamp",
     "preferredTrend": "Ønsket trend",
     "updateFrequency": "Oppdateringshyppighet",
-    "language": "Språk"
+    "language": "Språk",
+    "kpiType": "Type"
   },
   "validation": {
     "alpha": "Kan bare inneholde bokstaver",
@@ -136,7 +157,8 @@
     "size": "Må være mindre enn {size}KB",
     "double": "Må være en gyldig desimal",
     "positiveNotZero": "Ugyldig verdi",
-    "decimal": "Må være tall"
+    "decimal": "Må være tall",
+    "optional": "Valgfritt"
   },
   "general": {
     "appName": "OKR-tracker",
@@ -144,14 +166,15 @@
     "general": "Generelt",
     "OKRs": "OKR-er",
     "OKRsLong": "Mål og nøkkelresultater",
+    "OKRsLonger": "Mål og nøkkelresultater for {name}",
+    "KPI": "Måling",
     "KPIs": "Målinger",
-    "team": "Team",
+    "KPIsLong": "Målinger for {name}",
     "project": "OKR",
     "loading": "Laster ...",
     "owner": "Mattilsynet",
     "help": "Hjelp",
     "admin": "Admin",
-    "administration": "Administrasjon",
     "superAdmin": "Super admin",
     "signOut": "Logg ut",
     "createdBy": "Opprettet av",
@@ -160,19 +183,22 @@
     "products": "Produkter",
     "organizations": "Organisasjoner",
     "departments": "Produktområder",
-    "teamMembers": "Team-medlemmer",
+    "teamMembers": "Teammedlemmer",
     "users": "Brukere",
     "home": "Hjem",
     "keyResults": "Nøkkelresultater",
     "success": "Suksess",
     "objective": "Mål",
+    "objectiveBy": "Mål delt med {owner}",
+    "selectObjectivesInPeriod": "Velg alle mål i denne perioden",
+    "noObjectivesInPeriod": "Ingen mål i denne perioden",
     "keyResult": "Nøkkelresultat",
     "period": "Periode",
     "frontPage": "Forside",
     "signIn": "Vennligst logg inn",
     "orgs": "Virksomheter",
-    "emptyHome": "Vennligst velg en etat fra listen.",
-    "api": "API",
+    "api": "API-dokumentasjon",
+    "integrations": "Integrasjoner",
     "resultIndicator": "Resultatindikator",
     "keyFigures": "Nøkkeltall",
     "otherMeasurements": "Andre målinger",
@@ -181,19 +207,33 @@
     "selectRange": "Velg start- og sluttdato",
     "formErrors": "Skjemaet inneholder feil som må rettes.",
     "displayedAs": "Vises som: ",
-    "today": "I dag"
+    "today": "I dag",
+    "view": "Visning",
+    "step": "Steg {step} av {steps}",
+    "or": "eller",
+    "shortcuts": "Snarveier",
+    "graph": "Graf",
+    "error": "Feil",
+    "unknown": "ukjent"
+  },
+  "home": {
+    "welcome": "Velkommen til {appName}!",
+    "changeOrganization": "Bytt virksomhet"
   },
   "about": {
     "about": "Om",
+    "members": "Medlemmer",
     "aboutOrganization": "Om organisasjonen",
     "aboutDepartment": "Om området",
-    "aboutProduct": "Om produktet"
+    "aboutProduct": "Om produktet",
+    "organizationChildren": "Områdene i organisasjonen",
+    "departmentChildren": "Teamene i området"
   },
   "btn": {
     "close": "Lukk",
     "save": "Lagre",
-    "saveChanges": "Lagre endringer",
     "add": "Legg til",
+    "remove": "Fjern",
     "editNotes": "Endre notater",
     "addOrganization": "Ny organisasjon",
     "addProduct": "Nytt produkt",
@@ -201,18 +241,31 @@
     "acceptRequest": "Gi tilgang",
     "rejectRequest": "Slett forespørsel",
     "deleteUser": "Slett bruker",
+    "cancel": "Avbryt",
     "create": "Opprett",
+    "continue": "Fortsett",
+    "complete": "Fullfør",
+    "back": "Gå tilbake",
+    "createObjective": "Opprett mål",
+    "updateObjective": "Oppdater mål",
+    "createKeyResult": "Opprett nøkkelresultat",
+    "updateKeyResult": "Oppdater nøkkelresultat",
+    "addKeyResult": "Legg til nytt nøkkelresultat",
+    "addKeyResults": "Legg til nøkkelresultater",
     "delete": "Slett",
     "editItem": "Endre «{item}»",
+    "download": "Last ned",
     "upload": "Last opp",
     "minimize": "Minimer",
     "expand": "Ekspander",
     "restore": "Gjenopprett",
     "confirmDelete": "Bekreft sletting",
     "reset": "Nullstill",
-    "showMore": "Vis mer",
+    "showMore": "Vis alle",
     "syncData": "Synkroniser data",
-    "moreDetails": "Flere detaljer"
+    "moreDetails": "Flere detaljer",
+    "archiveObjective": "Arkiver mål",
+    "archiveKeyResult": "Arkiver nøkkelresultat"
   },
   "login": {
     "login": "Logg inn",
@@ -277,8 +330,8 @@
       "updateProgress": "Kunne ikke oppdatere målepunkt"
     },
     "savedChanges": "Lagret endringer",
-    "deleted": "Slettet object",
-    "restored": "Gjenopprettet dokument",
+    "deleted": "Slettet",
+    "restored": "Gjenopprettet",
     "request": {
       "noEmail": "Forespørselen feilet. E-post mangler.",
       "requested": "Forespørsel om tilgang sendt til admin",
@@ -296,15 +349,19 @@
     "description": "Beskrivelse",
     "startValue": "Startverdi",
     "targetValue": "Målverdi",
+    "progression": "Progresjon for nøkkelresultatet:",
     "unit": "Måleenhet",
+    "defaultUnit": "prosent",
     "newValue": "Ny verdi",
     "editValue": "Endre verdi",
+    "registeredValues": "Registrerte verdier",
     "automation": {
       "header": "Automatisk registrering av progresjon (Google Sheets)",
       "googleSheetUrl": "Google Sheets URL",
       "googleSheetUrlHelp": "Den fulle nettadressen til Google Sheets-regnearket",
       "sheetsTab": "Fane",
-      "sheetsTabHelp": "Samme som navnet på fanen i Google Sheets",
+      "sheetsTabPlaceholder": "Ark 1",
+      "sheetsTabHelp": "Navnet på arkfanen i Google Sheets",
       "sheetsCell": "Celle",
       "sheetsCellHelp": "For eksempel «A12»",
       "testConnection": "Lagre og test kobling"
@@ -315,11 +372,13 @@
     "commentPlaceholder": "Dette er en kommentar...",
     "updateValue": "Oppdater verdi",
     "dateAndTime": "Dato og tid",
-    "addComment": "Legg ved kommentarer (valgfritt)",
     "chooseDate": "Velg dato",
     "belongsTo": "Tilhører mål",
     "numberOfUpdates": "Antall oppdateringer",
-    "weight": "Vekt",
+    "weight": {
+      "label": "Vekt",
+      "help": "I utregningen av samlet progresjon for et mål vektes i utgangspunktet progresjonen for hvert nøkkelresultat likt (1). Det er imidlertid mulig å overstyre dette for hvert enkelt nøkkelresultat ved å endre tallverdien under."
+    },
     "automatic": "Oppdateres automatisk",
     "autoHelpText": "Verdien til dette nøkkelresultatet oppdateres automatisk fra et Google Sheets-dokument.",
     "autoError": "Feil i henting av data fra Google Sheets:",
@@ -327,46 +386,92 @@
       "radio": "Oppdatere via API?",
       "tooltip": "Skru på denne hvis du har planer om å oppdatere nøkkelresultatet selv via OKR-tracker sitt API - du kan fortsatt oppdatere manuelt også"
     },
-    "apiAndKeyRes": "Vi anbefaler ikke å skru på begge samtidig. Dette kan forårsake problemer med progresjonen til ditt nøkkelresultat"
+    "apiAndKeyRes": "Vi anbefaler ikke å skru på begge samtidig. Dette kan forårsake problemer med progresjonen til ditt nøkkelresultat",
+    "created": "Nøkkelresultatet ble opprettet!",
+    "updated": "Nøkkelresultatet ble endret!",
+    "edit": "Rediger nøkkelresultat"
   },
   "objective": {
-    "period": "Periode",
-    "progression": "Progresjon",
+    "period": "Arbeidsperiode",
+    "progressionTitle": "Prosentvis fremdrift for målet:",
+    "owner": "Ansvarlig",
+    "contributors": "Bidragsytere",
     "weight": "Vekt",
     "change": "Endre mål",
     "add": "Legg til mål",
     "createdBy": "Opprettet av",
     "editedBy": "Endret av",
     "created": "Opprettet",
-    "edited": "Sist endret"
+    "edited": "Sist endret",
+    "updated": "Målet ble endret!",
+    "movedWarning": "{activeItem} har for øyeblikket ingen nøkkelresultater registrert på dette målet. Når målet lukkes, vil det ikke lenger vises på denne tidslinjen. Du kan koble dere på som bidragsyter ved å legge til et nøkkelresultat nå, eller på et senere tidspunkt via {ownerLink}."
   },
   "period": {
     "choosePeriod": "Velg periode",
     "dateRange": "Start- og sluttdato",
     "sixmonths": "Siste 6 mnd",
     "year": "Hittil i år",
-    "all": "Fra første måling",
+    "all": "Alt",
     "thisQuarter": "Dette kvartalet",
     "previousQuarter": "Forrige kvartal"
+  },
+  "workbench": {
+    "selectedObjectives": "Valgte mål",
+    "progressionTitle": "Samlet progresjon for valgte mål i listen:"
   },
   "tooltip": {
     "openMenu": "Åpne meny",
     "keyResultValue": "Skriv inn ny måleverdi",
-    "changeView": "Endre visning til {view}",
+    "changeView": "Visning: {view}",
     "editProgress": "Endre målepunkt",
-    "deleteProgress": "Slett målepukt",
+    "deleteProgress": "Slett målepunkt",
     "isMember": "Medlem av team",
     "emptyPeriod": "Ingen aktiv periode",
     "periodEnd": "Du har ikke lov å gjøre endringer etter perioden er avsluttet",
     "copyToClipboard": "Kopier til utklippstavlen"
   },
-  "document": {
-    "mission": "Oppdrag"
-  },
   "admin": {
-    "apiSecret": "Hvis du har tenkt til å bruke APIet for å oppdatere nøkkelresultater og/eller målinger, så trenger du å skrive inn en streng her som legges inn i headeren til kallet (okr-team-secret)",
-    "curlHelp": "Oppdatering via {apiLink}-kall, f.eks. ved bruk av curl.",
-    "apiDocs": "API-dokumentasjon",
+    "item": {
+      "change": "Rediger {name}",
+      "updated": "{name} ble endret!",
+      "delete": "Slett {name}",
+      "slugChangeInfo": "Endring av navn kan også resultere i at gjeldende adresse for \"{name}\" endres. Du blir i så fall automatisk videresendt til den nye adressen etter at skjemaet lagres.",
+      "redirectInfo": "Du videresendes om {count} sekunder."
+    },
+    "objective": {
+      "new": "Nytt mål",
+      "created": "Målet ble opprettet!",
+      "updated": "Målet ble endret!",
+      "change": "Rediger mål",
+      "delete": "Slett mål",
+      "useLastPeriod": "Sett til sist brukte periode:",
+      "level": {
+        "label": "Visningsnivå",
+        "help": "Målet vises kun på tidslinjen til {owner} (standard).",
+        "helpLift": "Målet vises både på tidslinjen til {newOwner} og {owner}. Målet beholdes i sistnevntes tidslinje så lenge minst ett nøkkelresultat fra {owner} forblir tilkoblet målet.\n\nDet vil ikke lenger være mulig for medlemmer i {owner} å redigere målet, utover å legge til eller fjerne egne nøkkelresultater.",
+        "helpForeign": "Målet vises på tidslinjen til {owner}, samt tidslinjen til følgende bidragsytere: {contributors}. Visningsnivå kan ikke endres for mål som har eksterne bidragsytere.",
+        "liftWarning1": "Endring av visningsnivå kan ikke reverseres.",
+        "liftWarning2": "Du vil ikke lenger kunne redigere målet siden du ikke er medlem i {newOwner}, men du vil fortsatt kunne legge nøkkelresultater til målet."
+      }
+    },
+    "keyResult": {
+      "new": "Nytt nøkkelresultat",
+      "created": "Nøkkelresultatet ble opprettet!",
+      "updated": "Nøkkelresultatet ble endret!",
+      "change": "Rediger nøkkelresultat",
+      "delete": "Slett nøkkelresultat",
+      "owner": {
+        "label": "Ansvarlig team",
+        "help": "Teamet som er ansvarlig for å føgle opp dette nøkkelresultatet."
+      }
+    },
+    "measurement": {
+      "new": "Legg til måling",
+      "created": "Målingen ble opprettet!",
+      "updated": "Målingen ble endret!",
+      "change": "Rediger måling",
+      "delete": "Slett måling"
+    },
     "department": {
       "picture": "Bilde",
       "create": "Opprett nytt produktområde",
@@ -407,8 +512,7 @@
     "change": "Endre nøkkelresultat",
     "add": "Legg til nøkkelresultat",
     "notes": {
-      "empty": "Her kan du skrive notater som bare teamet ditt kan se.",
-      "save": "Lagre notater"
+      "empty": "Her kan du skrive notater som bare teamet ditt kan se."
     },
     "filter": "Filtrer"
   },
@@ -417,8 +521,9 @@
     "toc": "Innhold"
   },
   "view": {
-    "compact": "Kompakt",
-    "details": "Detaljer"
+    "details": "Detaljer",
+    "timeline": "Tidslinje",
+    "list": "Liste"
   },
   "keyResultsPage": {
     "notes": {
@@ -439,46 +544,38 @@
     "noKPIProgressInPeriod": "Denne målingen har ingen registrerte verdier i perioden.",
     "noKeyResults": {
       "heading": "Ingen nøkkelresultater",
-      "body": "Oops! Her er finnes det ingen nøkkelresultater ennå.",
+      "body": "Oops! Her finnes det ingen nøkkelresultater ennå.",
       "linkText": "Opprett et nøkkelresultat"
-    },
-    "noResultIndicators": {
-      "heading": "Ingen resultatindikatorer",
-      "body": "Oops! Her er finnes det ingen resultatindikatorer ennå.",
-      "linkText": "Opprett en resultatindikator"
-    },
-    "noKeyFigures": {
-      "heading": "Ingen nøkkeltall",
-      "body": "Oops! Her er finnes det ingen nøkkeltall ennå.",
-      "linkText": "Opprett et nøkkeltall"
-    },
-    "itemAdmin": {
-      "keyResult": "Ingen nøkkelresultater for mål",
-      "objective": "Ingen mål for periode",
-      "period": "Ingen perioder"
     },
     "noKPIs": {
       "heading": "Ingen målinger",
-      "body": "Oops! Her er finnes det ingen målinger ennå.",
-      "adminBody": "Her kan du opprette målinger som automatisk henter data fra Google Sheets. ",
-      "linkText": "Opprett en måling"
+      "body": "Oops! Her finnes det ingen målinger ennå.",
+      "adminBody": "Legg til målinger som gir en pekepinn på hva dere har oppnådd!",
+      "buttonText": "Opprett en måling"
     },
-    "noPeriods": {
-      "heading": "Tomt?",
-      "body": "Det ser visst ut som at det mangler noen mål og nøkkelresultater her ...",
-      "buttonText": "Opprett mål og nøkkelresultater her"
+    "noObjectives": {
+      "heading": "Her var det visst helt tomt!",
+      "body": "Det ser ut som at det mangler noen mål og nøkkelresultater her ..."
     },
-    "team": {
-      "body": "«Team Ninja» much?",
-      "heading": "Ingen teammedlemmer"
+    "noObjectivesInPeriod": {
+      "heading": "Ingen mål i valgt periode",
+      "body": "Vi fant ingen mål registrert innenfor den valgte perioden."
     }
   },
   "archived": {
     "heading": "Arkivert",
-    "body": "Dette objektet er arkivert og vises ikke for brukerne. Du kan endre detaljer før du gjenoppretter objektet."
+    "body": {
+      "objective": "Dette målet er arkivert og vises ikke lenger i listen over mål.",
+      "keyResult": "Dette nøkkelresultatet er arkivert og vises ikke lenger i listen over nøkkelresultater.",
+      "organization": "Denne organisasjonen er arkivert og ikke lenger synlig.",
+      "department": "Dette produktområdet er arkivert og ikke lenger synlig.",
+      "product": "Dette produktet er arkivert og ikke lenger synlig."
+    },
+    "restoreText": "Savner du det, er det bare å gjenopprette det."
   },
   "sheets": {
     "infoText": "Merk! Følgende adresse må gis lesetilgang til Google Sheets-dokumentet:",
+    "400": "Klarte ikke å lese ut data. Er navnet på Google Sheets-fanen riktig?",
     "403": "Systemet har ikke tilgang til å lese Google Sheets-dokumentet.",
     "404": "Fant ikke Google Sheets-dokumentet. Feil URL?",
     "noDataInCell": "Celle {cell} er tom."
@@ -496,7 +593,6 @@
       "value": "Verdi",
       "date": "Dato",
       "comment": "Kommentar",
-      "comment_optional": "Kommentar (valgfritt)",
       "actions": "Handlinger",
       "time": "Tidspunkt",
       "changedBy": "Sist endret av",
@@ -519,7 +615,6 @@
     "myProducts": "Min tilhørighet",
     "products": "Tilhørighet",
     "language": "Språk",
-    "access": "Tilgang",
     "position": {
       "groups": {
         "developers": "Utvikling",
@@ -569,19 +664,6 @@
       "storyteller": "Historieforteller"
     }
   },
-  "progress": {
-    "title": "Progresjon {progress}",
-    "done": "fullført",
-    "remaining": "{unit} gjenstår",
-    "remainingOf": "av {progress}",
-    "complete": "{progress} % fullført",
-    "completedMessages": {
-      "1": "Nå er dere gode!",
-      "2": "Dødsbra jobba, folkens!",
-      "3": "Wohoo! 100%",
-      "4": "Nice, dere klarte det!"
-    }
-  },
   "dashboard": {
     "problemDescription": "Problembeskrivelse",
     "targetAudience": "Målgruppe",
@@ -589,8 +671,52 @@
     "effect": "Effekt",
     "noRIs": "Området har ingen resultatindikatorer.",
     "downloadOptions": {
-      "png": "Bilde (.png)",
-      "csv": "Rådata (.csv)"
+      "png": "Last ned graf som bilde (.png)",
+      "csv": "Last ned rådata (.csv)"
+    }
+  },
+  "integration": {
+    "info": "Vårt API tilbyr funksjonalitet for blant annet å oppdatere nøkkelresultater og/eller målinger maskinelt. For å ta i bruk API-et må man opprette en klient. For hver klient genereres en klient-ID og en hemmelighet som legges inn i headeren til kallet ({clientIdHeader}, {clientSecretHeader}). Dette kommer i tillegg til en egen API-nøkkel ({apiKeyHeader}). Det anbefales å opprette en separat klient for hver enkelt applikasjon man kobler på API-et. Dette gjør det blant annet enklere å holde styr på hvilke hemmeligheter som er i bruk.",
+    "placeholderTitle": "Ny klient",
+    "clientId": "Klient ID",
+    "clientSecret": "Hemmelighet",
+    "action": {
+      "add": "Legg til klient",
+      "edit": "Rediger klient",
+      "delete": "Slett klient",
+      "rotate": "Roter hemmelighet",
+      "confirmRotate": "Bekreft rotering"
+    },
+    "tag": {
+      "created": "Opprettet {when} av {name}",
+      "edited": "Sist endret {when} av {name}",
+      "lastRotated": "Sist rotert for {when}",
+      "lastActivity": "Sist aktiv for {when}",
+      "noActivity": "Ingen aktivitet registrert enda"
+    },
+    "empty": {
+      "heading": "Ingen klienter",
+      "body": "Legg til en eller flere klienter her for å ta i bruk API-et. Dette gjør det enkelt å oppdatere nøkkelresultater og/eller målinger maskinelt."
+    },
+    "toast": {
+      "add": "Opprettet ny klient",
+      "addError": "Kunne ikke opprette ny klient",
+      "update": "Klienten ble endret",
+      "updateError": "Kunne ikke endre klienten",
+      "delete": "Klienten ble slettet",
+      "deleteError": "Kunne ikke slette klient",
+      "rotate": "Hemmeligheten ble rotert",
+      "rotateError": "Kunne ikke rotere hemmelighet"
+    },
+    "warning": {
+      "secret": "Hemmeligheten over må kopieres og oppbevares et trygt sted. Den vises kun denne ene gangen. Den er grei, {closeLink}!",
+      "secretCloseText": "jeg er ferdig",
+      "delete": "Ved sletting vil alle kjørende applikasjoner som benytter denne klienten slutte å fungere.",
+      "rotate": "Ved rotering vil alle kjørende applikasjoner som benytter gammel hemmelighet slutte å fungere.",
+      "deprecation": "Det er ikke lenger mulig å legge til eller endre API-hemmelighet her. Besøk fanen 'integrasjoner' i toppmenyen for å opprette en API-klient. Den gamle hemmeligheten fungerer enn så lenge:"
+    },
+    "error": {
+      "loading": "Kunne ikke hente ut klienter: {error}."
     }
   },
   "languages": {

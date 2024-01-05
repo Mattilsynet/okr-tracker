@@ -1,21 +1,18 @@
 <template>
   <div>
-    <div class="columns">
-      <div>
+    <div class="pkt-grid pkt-grid--full">
+      <div class="pkt-cell pkt-cell--span12 pkt-cell--span4-tablet-up">
         <h2 class="title-2">{{ $t('general.organizations') }}</h2>
-
         <div class="col">
-          <div v-if="filteredOrgs.length > 10" class="search">
-            <label class="form__group">
-              <input
-                v-model="queryOrgs"
-                class="form__field"
-                type="text"
-                :placeholder="
-                  $t('admin.organization.search', { count: organizations.length })
-                "
-              />
-            </label>
+          <div v-if="organizations.length > 10" class="search">
+            <input
+              v-model="queryOrgs"
+              class="pkt-form-input"
+              type="text"
+              :placeholder="
+                $t('admin.organization.search', { count: organizations.length })
+              "
+            />
           </div>
           <div class="col__body">
             <div
@@ -24,22 +21,19 @@
               class="col__row"
             >
               <router-link
-                class="col__link"
-                :to="{ name: 'ItemAdmin', params: { slug: organization.slug } }"
+                class="col__link pkt-txt-16-medium"
+                :to="itemLink(organization.slug)"
               >
-                <i class="col__icon fa fa-industry" />
-                {{ organization.name }}
-                <span
-                  v-if="organization.archived"
-                  class="col__archived fa fa-file-archive"
-                ></span>
+                <pkt-icon class="icon" name="organization" />
+                <span class="col__text">{{ organization.name }}</span>
+                <pkt-icon v-if="organization.archived" class="icon" name="archive" />
               </router-link>
             </div>
           </div>
           <div class="col__footer">
             <router-link
               v-if="user.superAdmin"
-              class="btn btn--fw"
+              class="create-link"
               :to="{ name: 'CreateOrganization' }"
               data-cy="create-organization"
             >
@@ -49,39 +43,32 @@
         </div>
       </div>
 
-      <div>
+      <div class="pkt-cell pkt-cell--span12 pkt-cell--span4-tablet-up">
         <h2 class="title-2">{{ $t('general.departments') }}</h2>
         <div class="col">
-          <div v-if="filteredDeps.length > 15" class="search">
-            <label class="form__group">
-              <input
-                v-model="queryDeps"
-                class="form__field"
-                type="text"
-                :placeholder="
-                  $t('admin.department.search', { count: departments.length })
-                "
-              />
-            </label>
+          <div v-if="departments.length > 10" class="search">
+            <input
+              v-model="queryDeps"
+              class="pkt-form-input"
+              type="text"
+              :placeholder="$t('admin.department.search', { count: departments.length })"
+            />
           </div>
           <div class="col__body">
             <div v-for="department in filteredDeps" :key="department.id" class="col__row">
               <router-link
-                class="col__link"
-                :to="{ name: 'ItemAdmin', params: { slug: department.slug } }"
+                class="col__link pkt-txt-16-medium"
+                :to="itemLink(department.slug)"
               >
-                <i class="col__icon fa fa-cubes" />
-                {{ department.name }}
-                <span
-                  v-if="department.archived"
-                  class="col__archived fa fa-file-archive"
-                ></span>
+                <pkt-icon class="icon" name="district" />
+                <span class="col__text">{{ department.name }}</span>
+                <pkt-icon v-if="department.archived" class="icon" name="archive" />
               </router-link>
             </div>
           </div>
           <div class="col__footer">
             <router-link
-              class="btn btn--fw"
+              class="create-link"
               :to="{ name: 'CreateDepartment' }"
               data-cy="create-department"
             >
@@ -91,34 +78,32 @@
         </div>
       </div>
 
-      <div>
+      <div class="pkt-cell pkt-cell--span12 pkt-cell--span4-tablet-up">
         <h2 class="title-2">{{ $t('general.products') }}</h2>
         <div class="col">
-          <div v-if="filteredProds.length > 15" class="search">
-            <label class="form__group">
-              <input
-                v-model="queryProds"
-                class="form__field"
-                type="text"
-                :placeholder="$t('admin.product.search', { count: products.length })"
-              />
-            </label>
+          <div v-if="products.length > 10" class="search">
+            <input
+              v-model="queryProds"
+              class="pkt-form-input"
+              type="text"
+              :placeholder="$t('admin.product.search', { count: products.length })"
+            />
           </div>
           <div class="col__body">
             <div v-for="product in filteredProds" :key="product.id" class="col__row">
               <router-link
-                class="col__link"
-                :to="{ name: 'ItemAdmin', params: { slug: product.slug } }"
+                class="col__link pkt-txt-16-medium"
+                :to="itemLink(product.slug)"
               >
-                <i class="col__icon fa fa-cube" />
-                {{ product.name }}
-                <i v-if="product.archived" class="col__archived fa fa-file-archive" />
+                <pkt-icon class="icon" name="house-heart" />
+                <span class="col__text">{{ product.name }}</span>
+                <pkt-icon v-if="product.archived" class="icon" name="archive" />
               </router-link>
             </div>
           </div>
           <div class="col__footer">
             <router-link
-              class="btn btn--fw"
+              class="create-link"
               :to="{ name: 'CreateProduct' }"
               data-cy="create-product"
             >
@@ -129,10 +114,15 @@
       </div>
     </div>
 
-    <div class="actions">
-      <label class="form-group--checkbox">
-        <input v-model="showArchived" type="checkbox" class="form__checkbox" />
-        <span class="form-label">{{ $t('admin.objects.showArchived') }}</span>
+    <div class="actions pkt-form-group pkt-form-group--row">
+      <input
+        id="showArchived"
+        v-model="showArchived"
+        type="checkbox"
+        class="pkt-form-check-input"
+      />
+      <label class="pkt-form-label" for="showArchived">
+        {{ $t('admin.objects.showArchived') }}
       </label>
     </div>
   </div>
@@ -181,37 +171,22 @@ export default {
   },
 
   watch: {
-    showArchived: {
+    user: {
       immediate: true,
-      handler() {
-        this.$bind(
-          'organizations',
-          db
-            .collection('organizations')
-            .where('archived', 'in', [false, this.showArchived])
-            .orderBy('slug')
-        );
-        this.$bind(
-          'departments',
-          db
-            .collection('departments')
-            .where('archived', 'in', [false, this.showArchived])
-            .orderBy('slug')
-        );
-        this.$bind(
-          'products',
-          db
-            .collection('products')
-            .where('archived', 'in', [false, this.showArchived])
-            .orderBy('slug')
-        );
-      },
+      handler: 'bindItems',
+    },
+
+    showArchived: {
+      immediate: false,
+      handler: 'bindItems',
     },
 
     organizations: {
       immediate: true,
       handler() {
-        this.filteredOrgs = this.organizations;
+        this.filteredOrgs = this.user.superAdmin
+          ? this.organizations
+          : this.organizations.filter((o) => this.user.admin.includes(o.id));
         this.fuseOrgs = new Fuse(this.filteredOrgs, fuseSettings);
       },
     },
@@ -219,7 +194,9 @@ export default {
     departments: {
       immediate: true,
       handler() {
-        this.filteredDeps = this.departments;
+        this.filteredDeps = this.user.superAdmin
+          ? this.departments
+          : this.departments.filter((d) => this.user.admin.includes(d.organization.id));
         this.fuseDeps = new Fuse(this.filteredDeps, fuseSettings);
       },
     },
@@ -227,7 +204,9 @@ export default {
     products: {
       immediate: true,
       handler() {
-        this.filteredProds = this.products;
+        this.filteredProds = this.user.superAdmin
+          ? this.products
+          : this.products.filter((p) => this.user.admin.includes(p.organization.id));
         this.fuseProds = new Fuse(this.filteredProds, fuseSettings);
       },
     },
@@ -256,39 +235,38 @@ export default {
       }
     },
   },
+
+  methods: {
+    bindItems() {
+      for (const collection of ['organizations', 'departments', 'products']) {
+        this.$bind(
+          collection,
+          db
+            .collection(collection)
+            .where('archived', 'in', [false, this.showArchived])
+            .orderBy('slug'),
+          { wait: true }
+        );
+      }
+    },
+
+    itemLink(slug) {
+      return {
+        name: 'ItemAbout',
+        params: { slug },
+        query: { edit: true },
+      };
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-.columns {
-  display: grid;
-  grid-gap: span(0, 1, span(12));
-  grid-template-rows: repeat(auto-fill, auto);
-  grid-template-columns: repeat(1, 1fr);
-
-  @media screen and (min-width: bp(s)) {
-    grid-gap: span(0, 1, span(6));
-    grid-template-columns: repeat(1, 1fr);
-  }
-
-  @media screen and (min-width: bp(m)) {
-    grid-gap: span(0, 1, span(6));
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media screen and (min-width: bp(l)) {
-    grid-gap: span(0, 1, span(7));
-    width: span(6, 0, span(7));
-  }
-}
-
 .col {
   display: flex;
   flex-direction: column;
   height: 32rem;
-  background: white;
-  border-radius: 3px;
-  box-shadow: 0 2px 4px rgba(var(--color-grayscale-40-rgb), 0.3);
+  background: var(--color-gray-light);
 }
 
 .col__body {
@@ -307,24 +285,47 @@ export default {
   padding: 1rem;
 }
 
-.col__icon {
-  flex-shrink: 0;
-  margin-right: 0.25rem;
-}
-
-.col__archived {
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
 .col__link {
   display: flex;
+  gap: 0.5rem;
   align-items: center;
   padding: 0.5rem 1rem;
   color: var(--color-text);
-  font-weight: 500;
-  font-size: 1rem;
   text-decoration: none;
-  border-bottom: 1px solid var(--color-grayscale-10);
+  border-bottom: 2px solid var(--color-border);
+
+  &:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+  }
+}
+
+.col__text {
+  flex: 1 0 auto;
+}
+
+.actions {
+  margin: 1.5rem 0;
+}
+
+.create-link {
+  display: block;
+  padding: 0.75rem;
+  color: var(--color-text);
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  background: var(--color-grayscale-10);
+
+  &:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+  }
+}
+
+.icon {
+  height: 1rem;
 }
 </style>

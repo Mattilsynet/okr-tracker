@@ -8,25 +8,29 @@
       <div class="progress-form">
         <div class="progress-form__left">
           <form-component
-            v-model="recordValue"
+            :value="recordValue"
             input-type="input"
             name="value"
             class="progress-form__value-group"
             :label="$t('widget.history.value')"
-            rules="required"
+            rules="required|min_value:0"
             type="number"
             data-cy="progress_value"
-          />
-          <span v-if="updatedValue" class="display-as">
-            {{ $t('general.displayedAs') }}
-            {{ formatKPIValue(activeKpi, thisRecord.value) }}
-          </span>
+            @input="(value) => (updatedValue = value)"
+          >
+            <template #sub>
+              <span v-if="updatedValue" class="display-as pkt-txt-14-medium">
+                {{ $t('general.displayedAs') }}
+                {{ formatKPIValue(kpi, displayValue) }}
+              </span>
+            </template>
+          </form-component>
 
           <form-component
             v-model="thisRecord.comment"
             input-type="textarea"
             name="comment"
-            :label="$t('widget.history.comment_optional')"
+            :label="$t('widget.history.comment')"
             :placeholder="$t('keyResult.commentPlaceholder')"
             data-cy="progress_comment"
             class="progress-form__comment-group"
@@ -34,41 +38,33 @@
         </div>
 
         <div class="progress-form__right">
-          <validation-provider v-slot="{ errors }" name="datetime" rules="required">
-            <label class="form-group">
-              <span class="form-label">{{ $t('widget.history.date') }}</span>
-
+          <validation-provider name="datetime" rules="required">
+            <label class="pkt-form-group">
+              <span class="pkt-form-label">{{ $t('widget.history.date') }}</span>
               <flat-pickr
                 v-model="thisRecord.timestamp"
                 :config="flatPickerConfig"
-                class="form-control flatpickr-input"
+                class="pkt-form-input flatpickr-input"
                 name="datetime"
                 :placeholder="$t('widget.history.date')"
                 @on-change="onDateSelected"
               />
-              <span class="form-field--error">{{ errors[0] }}</span>
             </label>
           </validation-provider>
         </div>
       </div>
 
       <pkt-alert v-if="existingValue" skin="warning">
-        <template #content>
-          {{
-            $t('widget.history.overwriteWarning', {
-              date: dateShort(existingValue.timestamp.toDate()),
-              value: formatKPIValue(activeKpi, existingValue.value),
-            })
-          }}
-        </template>
+        {{
+          $t('widget.history.overwriteWarning', {
+            date: dateShort(existingValue.timestamp.toDate()),
+            value: formatKPIValue(kpi, existingValue.value),
+          })
+        }}
       </pkt-alert>
 
       <template #actions="{ handleSubmit, submitDisabled }">
-        <btn-save
-          :label="$t(record ? 'btn.saveChanges' : 'btn.save')"
-          :disabled="submitDisabled || loading"
-          @click="handleSubmit(save)"
-        />
+        <btn-save :disabled="submitDisabled || loading" @click="handleSubmit(_save)" />
       </template>
     </form-section>
 
@@ -81,29 +77,36 @@
           </router-link>
         </template>
       </i18n>
-      <progress-update-API-example :path="`kpi/${activeKpi.id}`" />
+      <progress-update-API-example :path="`kpi/${kpi.id}`" />
     </template>
   </modal-wrapper>
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import { endOfDay } from 'date-fns';
-import Progress from '@/db/Kpi/Progress';
+import { PktAlert } from '@oslokommune/punkt-vue2';
 import { dateShort } from '@/util';
 import { formatKPIValue } from '@/util/kpiHelpers';
+import Progress from '@/db/Kpi/Progress';
+import ProgressModal from '@/components/modals/ProgressModal.vue';
 import ProgressUpdateAPIExample from '@/components/ProgressUpdateAPIExample.vue';
-import ProgressModal from './ProgressModal.vue';
 
 export default {
   name: 'KPIProgressModal',
 
   components: {
-    PktAlert: () => import('@oslokommune/punkt-vue2').then(({ PktAlert }) => PktAlert),
+    PktAlert,
     ProgressUpdateAPIExample,
   },
 
   extends: ProgressModal,
+
+  props: {
+    kpi: {
+      type: Object,
+      required: true,
+    },
+  },
 
   data: () => ({
     existingValue: null,
@@ -120,25 +123,26 @@ export default {
   }),
 
   computed: {
-    ...mapState(['activeKpi']),
     typePercentage() {
-      return this.activeKpi.format === 'percentage';
+      return this.kpi.format === 'percentage';
     },
-    recordValue: {
-      get() {
-        if (!this.thisRecord.value) {
-          return null;
-        }
 
-        const n = this.typePercentage
-          ? this.thisRecord.value * 100
-          : this.thisRecord.value;
-        return parseFloat(n.toFixed(4));
-      },
-      set(val) {
-        this.thisRecord.value = this.typePercentage ? val / 100 : val;
-        this.updatedValue = this.thisRecord.value;
-      },
+    recordValue() {
+      let val = this.thisRecord.value;
+
+      if (val === null || val === undefined) {
+        return null;
+      }
+
+      if (this.typePercentage) {
+        val *= 100;
+      }
+
+      return parseFloat(val.toFixed(6));
+    },
+
+    displayValue() {
+      return this.typePercentage ? this.updatedValue / 100 : this.updatedValue;
     },
   },
 
@@ -150,13 +154,17 @@ export default {
     dateShort,
     formatKPIValue,
 
-    async onDateSelected() {
-      if (!this.activeKpi) {
-        return;
-      }
+    async _save() {
+      const val = parseFloat(this.updatedValue);
 
+      this.thisRecord.value = this.typePercentage ? val / 100 : val;
+
+      this.save();
+    },
+
+    async onDateSelected() {
       const existingValueSnapshot = await Progress.get(
-        this.activeKpi.id,
+        this.kpi.id,
         new Date(this.thisRecord.timestamp)
       );
 

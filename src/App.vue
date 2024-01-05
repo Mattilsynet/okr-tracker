@@ -1,8 +1,6 @@
 <template>
   <div class="app">
-    <pkt-icons-sprite />
     <app-layout />
-    <vue-griddle />
   </div>
 </template>
 
@@ -11,14 +9,12 @@ import { mapActions } from 'vuex';
 import { auth } from '@/config/firebaseConfig';
 
 import AppLayout from './components/AppLayout.vue';
-import PktIconsSprite from './components/PktIconsSprite.vue';
 
 export default {
   name: 'App',
 
   components: {
     AppLayout,
-    PktIconsSprite,
   },
 
   computed: {
@@ -44,11 +40,12 @@ document.body.addEventListener('mousedown', () => {
 document.body.addEventListener('keydown', () => {
   document.body.classList.remove('using-mouse');
 });
-</script>
 
-<style lang="scss" scoped>
-.app {
-  min-height: 100vh;
-  background: var(--color-gray);
-}
-</style>
+/*
+ * The swagger-ui package loads zenscroll, which overrides scolling behavior of
+ * *every* anchor tag on every page by placing a nasty click event listener on
+ * the main `html` element. In order to disable this, we have to do the
+ * following before the swagger-ui package even loads.
+ */
+window.noZensmooth = true;
+</script>

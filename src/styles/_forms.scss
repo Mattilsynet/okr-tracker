@@ -1,91 +1,109 @@
+@use '@oslokommune/punkt-css/dist/scss/abstracts/mixins/typography' as *;
 @use 'range-slider' as *;
-@use 'typography';
 
-input,
-select,
-option,
-textarea {
-  width: 100%;
-  padding: 0.5rem;
-  color: var(--color-text);
+/*
+  Some Punkt elements, e.g. inputs, check- and radio-buttons, are still marked
+  work in progress (as per v5.0.8). The following is an attempt to match the
+  design in Figma until these are fully implemented in CSS and as components.
+*/
+
+.pkt-form {
+  line-height: 1.5rem;
+
+  .pkt-hr {
+    margin-top: 0;
+  }
+}
+
+.pkt-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &--row {
+    flex-direction: row;
+  }
+
+  &--error {
+    .pkt-form-input,
+    .pkt-form-textarea {
+      border-color: var(--color-red);
+    }
+    .v-select {
+      --vs-border-color: var(--color-red);
+    }
+  }
+}
+
+.pkt-form-label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
   font-weight: 500;
-  font-size: 1rem;
-  background: var(--color-white);
-  border: 1px solid var(--color-text);
 
-  &:disabled {
-    color: var(--color-text);
-    background: var(--color-grayscale-10);
-    cursor: not-allowed;
+  .pkt-badge {
+    // Align badges, used to indicate optional form fields, with Figma design.
+    @include get-text('pkt-txt-14-light');
+    height: auto;
+    padding: 0.125rem 0.5rem;
   }
 }
 
-.form-group {
-  display: block;
-  margin: 1rem 0;
+.pkt-form-help {
+  margin: 0;
+  line-height: 1.375rem; // 22px
+}
 
-  &--error {
-    .form-input, .vs__dropdown-toggle, .vs__dropdown-menu {
-      border-color: var(--color-error);
+.pkt-form-input,
+.pkt-form-textarea {
+  &.flatpickr-input:not(:disabled)[readonly] {
+    // Reset `readonly` state style for flatpickr inputs.
+    color: var(--color-blue-dark);
+    background-color: var(--color-white);
+    border-color: var(--color-blue-dark);
+
+    &:focus {
+      color: var(--color-active);
+      border-color: var(--color-active);
     }
-    .form-label {
-      color: var(--color-error);
+  }
+}
+
+.pkt-form-check-input {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+
+  &:hover + .pkt-form-label {
+    color: var(--color-active);
+  }
+
+  + .pkt-form-label {
+    flex-direction: column;
+    gap: 0;
+    align-items: flex-start;
+    font-weight: 300;
+
+    .description {
+      display: block;
+      margin-top: 0.5rem;
+      font-weight: 300;
     }
   }
-}
 
-.form-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--color-text);
-
-  &--hasPrimaryBackground {
-    color: var(--color-text-secondary);
-  }
-}
-
-.form-field {
-  display: block;
-  margin-top: 1rem;
-
-  &--error {
-    margin-bottom: 0;
-    color: var(--color-red);
+  &--tile {
+    // TODO: Fully implemented the tiled check box and radio button.
+    + .pkt-form-label {
+      font-weight: 500;
+    }
   }
 
-  &--small {
-    max-width: 400px;
-  }
-}
-
-.form-row {
-  display: grid;
-  grid-gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  align-items: end;
-  margin: 1rem 0;
-
-  & .form-group {
-    margin: 0;
-  }
-  .form-field + .form-field {
-    margin-left: 1rem;
+  &[type='checkbox']:checked {
+    background-color: var(--choice-checked-rb-bc);
   }
 }
 
 .form-input {
-  width: 100%;
-  padding: 0.5rem;
-  color: var(--color-text);
-  font-weight: 500;
-  font-size: 1rem;
-  background: var(--color-white);
-  border: 1px solid var(--color-primary);
-
-  &--readonly {
-    background: var(--color-grayscale-10);
-  }
-
   &__wrapper {
     display: flex;
     align-items: stretch;
@@ -96,79 +114,40 @@ textarea {
       width: 100%;
     }
 
-    > .btn {
-      margin-left: 0;
-      font-size: 0.75rem;
-      background: var(--color-gray-light);
-      border: 1px solid var(--color-primary);
-      border-left: 0;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-      cursor: pointer;
+    &--copiable {
+      position: relative;
 
-      &:hover {
-        color: var(--color-text-secondary);
-        background-color: var(--color-hover);
-      }
-
-      > i.far, i.fas {
-        margin: 0 0.25rem;
+      .pkt-form-input,
+      .pkt-form-textarea {
+        padding-right: 3rem;
       }
     }
   }
-}
 
-.form-help {
-  display: block;
-  margin: 0.5rem 0;
-  color: var(--color-text);
-  font-size: 0.85rem;
-  line-height: 1.25;
-
-  &--hasPrimaryBackground {
-    color: var(--color-text-secondary);
-  }
-}
-
-.form__checkbox {
-  position: relative;
-}
-
-.form-group--checkbox {
-  display: flex;
-  margin: 1.5rem 0;
-
-  .form__checkbox {
-    z-index: 2;
-    width: auto;
-  }
-
-  .form-label {
-    display: block;
-    flex-grow: 1;
+  &__copy-button {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    height: 2.875rem;
   }
 }
 
 .form-errors {
-  margin-top: 1.5rem !important;
+  margin: 1.5rem 0;
 
   &__list {
-    font-size: typography.$font-size-1;
+    @include get-text('pkt-txt-14-light');
     list-style: square;
 
     > li {
       margin: 0 1.5rem;
 
       > span:first-child {
+        @include get-text('pkt-txt-14-medium');
         margin-right: 0.5rem;
-        font-weight: 500;
       }
     }
   }
-}
-
-.preview-image {
-  max-width: 200px;
 }
 
 .toggle {
@@ -195,7 +174,7 @@ textarea {
 
       &::before {
         left: 1.25rem;
-        content: '\f00c';
+        content: '✔';
       }
 
       &::after {
@@ -224,8 +203,6 @@ textarea {
       width: 1.5rem;
       height: 1.5rem;
       font-weight: 900;
-
-      font-family: 'Font Awesome 5 Free';
       text-align: center;
       background: white;
       border-radius: 50%;
@@ -262,7 +239,6 @@ textarea {
     align-items: center;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    color: var(--color-text);
   }
 
   &--disabled {
@@ -281,19 +257,13 @@ textarea {
   }
 }
 
-.descriptive-radio {
-  margin: 1.5rem 0;
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
 
-  .title {
-    margin-left: 0.25rem;
-    font-weight: 500;
-  }
-
-  .description {
-    display: block;
-    margin: 0.25rem 1.75rem 0 1.75rem;
-    color: var(--color-grayscale-60);
-    font-size: typography.$font-size-1;
-    line-height: 1.25;
+  &--left {
+    justify-content: flex-start;
   }
 }

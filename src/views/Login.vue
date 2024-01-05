@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="main__second">
+  <page-layout breakpoint="phablet">
+    <div class="card">
       <h1 class="title-1">{{ $t('login.login') }}</h1>
       <div v-if="loginLoading && loginError === null">
         <loading-small></loading-small>
@@ -50,50 +50,39 @@
             />
           </form>
         </validation-observer>
-        <button class="btn btn--pri" form="login">{{ $t('login.login') }}</button>
+        <pkt-button type="submit" form="login">{{ $t('login.login') }}</pkt-button>
       </div>
 
       <div v-if="!loginLoading || loginError !== null" class="login__footer">
-        <button
-          v-if="providers.includes('microsoft')"
-          class="btn btn--pri btn--icon btn--icon-pri"
-          @click="loginWithMicrosoft"
-        >
-          <i class="icon fab fa-fw fa-microsoft" />
+        <pkt-button v-if="providers.includes('microsoft')" @onClick="loginWithMicrosoft">
           {{ $t('login.microsoft') }}
-        </button>
+        </pkt-button>
 
-        <button
-          v-if="providers.includes('google')"
-          class="btn btn--icon btn--pri btn--icon-pri"
-          @click="loginWithGoogle"
-        >
-          <i class="icon fab fa-fw fa-google" />
+        <pkt-button v-if="providers.includes('google')" @onClick="loginWithGoogle">
           {{ $t('login.google') }}
-        </button>
+        </pkt-button>
 
-        <button
+        <pkt-button
           v-if="providers.includes('email')"
-          class="btn btn--sec"
+          skin="secondary"
           data-cy="login-username"
-          @click="showForm = true"
+          @onClick="showForm = true"
         >
           {{ $t('login.loginWithUsername') }}
-        </button>
-        <router-link
-          class="btn btn--sec"
-          :to="{ name: 'request-access' }"
-          data-cy="login-request"
-        >
-          {{ $t('login.requestAccess') }}
+        </pkt-button>
+        <router-link :to="{ name: 'request-access' }" data-cy="login-request">
+          <pkt-button skin="secondary">
+            {{ $t('login.requestAccess') }}
+          </pkt-button>
         </router-link>
       </div>
     </div>
-  </div>
+  </page-layout>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex';
+import { PktButton } from '@oslokommune/punkt-vue2';
 import { auth, loginProviderGoogle, loginProviderMS } from '@/config/firebaseConfig';
 import i18n from '@/locale/i18n';
 import LoadingSmall from '@/components/LoadingSmall.vue';
@@ -101,7 +90,10 @@ import LoadingSmall from '@/components/LoadingSmall.vue';
 export default {
   name: 'Login',
 
-  components: { LoadingSmall },
+  components: {
+    LoadingSmall,
+    PktButton,
+  },
 
   data: () => ({
     email: '',
@@ -182,22 +174,15 @@ export default {
   flex-direction: column;
   gap: 0.5rem 0.5rem;
   margin-top: 2rem;
-}
 
-.login__secondary {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 1.75rem -0.25rem -0.25rem;
-
-  & > .btn {
-    margin: 0.25rem;
+  button {
+    width: 100%;
   }
 }
 
 .error {
   margin: 1.5rem 0;
   padding: 1em 1.5em;
-  color: var(--color-text);
   background: rgba(var(--color-red-rgb), 0.25);
   border: 1px solid var(--color-red);
   border-radius: 2px;

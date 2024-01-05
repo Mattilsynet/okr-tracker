@@ -4,11 +4,15 @@ import { vuexfireMutations } from 'vuexfire';
 import i18n from '@/locale/i18n';
 import { sortByLocale } from '@/store/actions/actionUtils';
 
+import { isDepartment, isProduct } from '@/util/getActiveItemType';
+import defaultPreferences from '@/db/User/defaultPreferences';
 import moduleActions from './actions';
+import okrsModule from './modules/okrs';
+import kpisModule from './modules/kpis';
 
 Vue.use(Vuex);
 
-export const getters = {
+export const storeGetters = {
   tree: (state) => {
     const { organizations, departments, products } = state;
 
@@ -29,59 +33,74 @@ export const getters = {
     });
   },
 
-  isAdmin: (state) => {
-    // Returns `true` if user has `admin: true` or if user is member of `activeItem`
+  /**
+   * Returns `true` if the current user is an admin of the parent organization
+   * of `activeItem`.
+   */
+  isAdminOfCurrentOrganization: (state) => {
     const { user, activeItem } = state;
 
-    if (user && user.superAdmin) {
-      return true;
-    }
-    if (user && user.admin && user.admin.length > 0) {
-      return true;
-    }
-    if (!user || !activeItem || !activeItem.team) {
+    if (!user || !activeItem) {
       return false;
     }
+
+    return (
+      user.admin?.includes(
+        activeItem.organization ? activeItem.organization.id : activeItem.id
+      ) || false
+    );
+  },
+
+  /**
+   * Returns `true` if the current user has admin rights or is member of
+   * `activeItem`.
+   */
+  hasEditRights: (state, getters) => {
+    const { user, activeItem } = state;
+
+    if (!user || !activeItem) {
+      return false;
+    }
+
+    if (user.superAdmin || getters.isAdminOfCurrentOrganization) {
+      return true;
+    }
+
+    if (!activeItem.team) {
+      return false;
+    }
+
     return activeItem.team.map(({ id }) => id).includes(user.id);
   },
 
-  hasEditRights: (state) => {
-    // Returns `true` if user has `admin: true` or if user is member of `activeItem`
+  /**
+   * Return `true` if the current user is an admin of the active item or a
+   * member of its parent item.
+   */
+  hasParentEditRights: (state, getters) => {
     const { user, activeItem } = state;
-    const { organization } = activeItem;
 
-    const isAdminOfOrganization = organization
-      ? user.admin && user.admin.includes(organization.id)
-      : user.admin && user.admin.includes(activeItem.id);
-
-    if (user && user.superAdmin) {
-      return true;
-    }
-    if (isAdminOfOrganization) {
-      return true;
-    }
-    if (!user || !activeItem || !activeItem.team) {
+    if (!user || !activeItem) {
       return false;
     }
-    return activeItem.team.map(({ id }) => id).includes(user.id);
-  },
 
-  allowedToEditPeriod: (state) => {
-    const { user, activePeriod, activeItem } = state;
-    const { organization } = activeItem;
-
-    const isAdminOfOrganization = organization
-      ? user.admin && user.admin.includes(organization.id)
-      : user.admin && user.admin.includes(activeItem.id);
-
-    if (user && user.superAdmin) {
-      return true;
-    }
-    if (isAdminOfOrganization) {
+    if (user.superAdmin || getters.isAdminOfCurrentOrganization) {
       return true;
     }
 
-    return activePeriod.endDate.toDate() > new Date();
+    if (isProduct(activeItem) && activeItem.department.team) {
+      return activeItem.department.team
+        .map((userDoc) => userDoc.split('/')[1])
+        .includes(user.id);
+    }
+
+    if (isDepartment(activeItem) && activeItem.organization.team) {
+      return activeItem.organization.team
+        .map((userDoc) => userDoc.split('/')[1])
+        .includes(user.id);
+    }
+
+    return false;
   },
 
   sidebarGroups: (state) => {
@@ -133,23 +152,13 @@ export const getters = {
     ];
   },
 
-  hasCheckedOrganizations: (state) => {
+  activeOrganization: (state) => {
     const { organizations, user } = state;
-    const orgs = user.preferences?.home?.collapse?.organization;
-
-    if (!orgs) {
-      return false;
+    const organizationSlug = user?.preferences?.homeOrganization;
+    if (!organizationSlug) {
+      return null;
     }
-
-    const checked = [];
-
-    organizations.forEach((org) => {
-      if (orgs[org.slug]) {
-        checked.push(orgs[org.slug]);
-      }
-    });
-
-    return checked.length > 0;
+    return organizations.find((org) => org.slug === organizationSlug) || null;
   },
 };
 
@@ -179,14 +188,12 @@ export const actions = {
     return true;
   },
 
-  setActiveOrganization: async ({ commit }, payload) => {
-    commit('SET_ACTIVE_ORGANIZATION', payload);
-    return true;
-  },
-
-  setSelectedPeriod: async ({ commit }, payload) => {
-    commit('SET_SELECTED_PERIOD', payload);
-    return true;
+  setActiveOrganization: async ({ commit, dispatch, state }, orgId) => {
+    const orgSlug = orgId
+      ? state.organizations.find((org) => org.id === orgId)?.slug || null
+      : null;
+    commit('SET_HOME_ORGANIZATION', orgSlug);
+    dispatch('update_preferences');
   },
 };
 
@@ -221,16 +228,19 @@ export const mutations = {
     state[`${payload.type}Unsubscribe`] = payload.unsubscribe;
   },
 
-  SET_ACTIVE_ORGANIZATION(state, payload) {
-    state.activeOrganization = payload;
-  },
-
-  SET_SELECTED_PERIOD(state, payload) {
-    state.selectedPeriod = payload;
+  SET_HOME_ORGANIZATION(state, orgSlug) {
+    if (!state.user.preferences) {
+      state.user.preferences = defaultPreferences;
+    }
+    state.user.preferences.homeOrganization = orgSlug;
   },
 };
 
 export default new Vuex.Store({
+  modules: {
+    okrs: okrsModule,
+    kpis: kpisModule,
+  },
   state: {
     user: null,
     users: [],
@@ -239,31 +249,20 @@ export default new Vuex.Store({
     products: [],
     activeItem: null,
     activeItemRef: null,
-    activeKeyResult: null,
     activePeriod: null,
-    activeObjective: null,
-    activeOrganization: null,
-    activeKpi: null,
     periods: [],
     objectives: [],
-    keyResults: [],
-    kpis: [],
-    subKpis: [],
+    objectiveContributors: [],
     loginError: null,
-    views: [
-      { label: i18n.t('view.compact'), id: 'compact', icon: '' },
-      { label: i18n.t('view.details'), id: 'details', icon: '' },
-    ],
     loading: false,
     providers: import.meta.env.VITE_LOGIN_PROVIDERS.split('-'),
     loginLoading: false,
     dataLoading: false,
-    selectedPeriod: null,
     organizationsUnsubscribe: () => {},
     departmentsUnsubscribe: () => {},
     productsUnsubscribe: () => {},
   },
-  getters,
+  getters: storeGetters,
   mutations,
   actions,
 });

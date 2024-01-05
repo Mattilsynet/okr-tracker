@@ -1,5 +1,4 @@
 import { firestoreAction } from 'vuexfire';
-import { db } from '@/config/firebaseConfig';
 import getActivePeriod from './actionUtils';
 
 /**
@@ -9,6 +8,7 @@ import getActivePeriod from './actionUtils';
 export default firestoreAction(
   async ({ bindFirestoreRef, unbindFirestoreRef, commit, dispatch }, item) => {
     if (!item) {
+      dispatch('kpis/clearKpis');
       return unbindFirestoreRef('activeItem');
     }
 
@@ -22,17 +22,12 @@ export default firestoreAction(
     await bindFirestoreRef('periods', periodsRef, { maxRefDepth: 0 });
 
     // Bind active period
-    await dispatch(
-      'set_active_period_and_data',
-      activePeriodRef ? activePeriodRef.id : null
-    );
+    await dispatch('set_active_period_and_data', {
+      periodId: activePeriodRef ? activePeriodRef.id : null,
+    });
 
     // Bind KPIs
-    const kpisRef = db
-      .collection('kpis')
-      .where('parent', '==', item)
-      .where('archived', '==', false);
-    await bindFirestoreRef('kpis', kpisRef, { maxRefDepth: 1 });
+    await dispatch('kpis/setKpis');
 
     return true;
   }

@@ -1,6 +1,3 @@
-@use 'griddle/mixins' as *;
-@use 'griddle/functions' as *;
-
 .details {
   display: flex;
   flex-direction: column;
@@ -17,7 +14,6 @@
 
 .details__item-heading {
   padding-bottom: 0.2rem;
-  color: var(--color-grayscale-30);
 }
 
 .details__item-value {

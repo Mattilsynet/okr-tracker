@@ -4,6 +4,8 @@
       {{ $t('kpi.goals.edit') }}
     </template>
 
+    <p class="mb-size-16 pkt-txt-14">{{ $t('kpi.goals.help') }}</p>
+
     <div class="goal-form">
       <div class="goal-form__left">
         <ul>
@@ -18,10 +20,14 @@
             </a>
           </li>
         </ul>
-        <button class="btn btn--ter btn--icon btn--fw" @click="addGoal(kpi)">
-          <i class="icon fa fa-plus" />
-          <span>{{ $t('kpi.goals.new') }}</span>
-        </button>
+        <pkt-button
+          skin="tertiary"
+          variant="icon-left"
+          icon-name="plus-sign"
+          @onClick="addGoal(kpi)"
+        >
+          {{ $t('kpi.goals.new') }}
+        </pkt-button>
       </div>
 
       <div class="goal-form__right">
@@ -46,24 +52,24 @@
           />
 
           <form-component
-            v-model="goalValue"
+            v-model="value"
             input-type="input"
             name="value"
             :label="$t('fields.value')"
             type="number"
             rules="required"
-          />
-          <span v-if="goalValue" class="display-as">
-            {{ $t('general.displayedAs') }} {{ formatKPIValue(kpi, value) }}
-          </span>
+          >
+            <template #sub>
+              <span v-if="value" class="display-as pkt-txt-14-medium">
+                {{ $t('general.displayedAs') }}
+                {{ formatKPIValue(kpi, typePercentage ? value / 100 : value) }}
+              </span>
+            </template>
+          </form-component>
 
           <template #actions="{ handleSubmit, submitDisabled }">
-            <btn-delete @click="archive($event)" />
-            <btn-save
-              :label="$t('btn.saveChanges')"
-              :disabled="submitDisabled"
-              @click="handleSubmit(update)"
-            />
+            <btn-delete @click="archive" />
+            <btn-save :disabled="submitDisabled" @click="handleSubmit(update)" />
           </template>
         </form-section>
       </div>
@@ -75,6 +81,7 @@
 
 <script>
 import { endOfDay, endOfYear, startOfYear } from 'date-fns';
+import { PktButton } from '@oslokommune/punkt-vue2';
 import { db } from '@/config/firebaseConfig';
 import Goal from '@/db/Kpi/Goal';
 import { FormSection, BtnDelete, BtnSave } from '@/components/generic/form';
@@ -90,6 +97,7 @@ export default {
     FormSection,
     BtnDelete,
     BtnSave,
+    PktButton,
   },
 
   props: {
@@ -120,14 +128,6 @@ export default {
     typePercentage() {
       return this.kpi.format === 'percentage';
     },
-    goalValue: {
-      get() {
-        return this.typePercentage ? this.value * 100 : this.value;
-      },
-      set(val) {
-        this.value = this.typePercentage ? val / 100 : val;
-      },
-    },
   },
 
   watch: {
@@ -155,6 +155,10 @@ export default {
 
   methods: {
     formatKPIValue,
+
+    truncateFloat(f) {
+      return parseFloat(f.toFixed(4));
+    },
 
     close() {
       this.$emit('close');
@@ -202,7 +206,8 @@ export default {
         this.period = [fromDate.toDate(), toDate.toDate()];
         [this.fromDate, this.toDate] = this.period;
       }
-      this.value = activeGoal.get('value');
+      const val = activeGoal.get('value');
+      this.value = this.typePercentage ? this.truncateFloat(val * 100) : val;
     },
 
     async clearActiveGoal() {
@@ -221,7 +226,7 @@ export default {
           name: this.name,
           fromDate: this.fromDate,
           toDate: this.toDate,
-          value: this.value,
+          value: this.typePercentage ? this.value / 100 : this.value,
         });
 
         this.$toasted.show(this.$t('toaster.savedChanges'));
@@ -231,9 +236,7 @@ export default {
       }
     },
 
-    async archive(event) {
-      event.preventDefault();
-
+    async archive() {
       try {
         await Goal.archive(this.kpi.id, this.activeGoalId);
         const restoreCallback = this.restore.bind(this, this.kpi.id, this.activeGoalId);
@@ -271,7 +274,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/typography';
+@use '@oslokommune/punkt-css/dist/scss/abstracts/mixins/breakpoints' as *;
 
 ::v-deep .modal {
   overflow-y: visible;
@@ -282,15 +285,13 @@ export default {
   flex-direction: column;
   gap: 1rem;
 
-  @media screen and (min-width: bp(s)) {
+  @include bp('phablet-up') {
     flex-direction: row;
+    gap: 1.5rem;
   }
 
   .display-as {
-    padding-bottom: 0.5rem;
-    color: var(--color-grey-500);
-    font-weight: 500;
-    font-size: typography.$font-size-1;
+    color: var(--color-grayscale-60);
   }
 
   &__left {
@@ -298,11 +299,7 @@ export default {
     flex-direction: column;
     flex-grow: 1;
     height: 100%;
-    border: 1px solid var(--color-grayscale-10);
-
-    @media screen and (min-width: bp(s)) {
-      margin-right: 1.5rem;
-    }
+    border: 2px solid var(--color-border);
 
     ul {
       height: 19rem;
@@ -312,21 +309,13 @@ export default {
     li {
       display: block;
       padding: 0.5rem 0.75rem;
-      color: var(--color-text);
       text-decoration: none;
-      border-bottom: 1px solid var(--color-grayscale-10);
+      border-bottom: 2px solid var(--color-border);
       cursor: pointer;
 
       &.selected {
-        color: var(--color-text);
         font-weight: 500;
         background: var(--color-gray-light);
-      }
-
-      &.active {
-        color: var(--color-text-secondary);
-        font-weight: 500;
-        background: var(--color-primary);
       }
     }
 
@@ -336,8 +325,15 @@ export default {
     }
 
     button {
+      display: flex;
+      justify-content: center;
       margin-top: auto;
-      border-top: 1px solid var(--color-grayscale-10);
+      border-top: 2px solid var(--color-border);
+    }
+
+    .icon {
+      height: 1.5rem;
+      margin-right: -0.25rem;
     }
   }
 
@@ -345,15 +341,6 @@ export default {
     display: flex;
     flex-basis: 45%;
     flex-direction: column;
-  }
-
-  ::v-deep form span:first-child .form-group {
-    margin-top: 0;
-  }
-
-  .button-row {
-    justify-content: flex-end;
-    margin-top: 2rem;
   }
 }
 </style>

@@ -3,7 +3,7 @@ swagger: "2.0"
 info:
   title: OKR Tracker API
   description: API for updating KPIs and key results.
-  version: 1.4.0
+  version: 2.0.0
   contact:
     name: Dataspeilet
     url: https://okr.oslo.systems
@@ -11,6 +11,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
+host: <host>
 schemes:
   - https
 produces:
@@ -20,20 +21,42 @@ x-google-backend:
   path_translation: APPEND_PATH_TO_ADDRESS
   protocol: h2
 security:
-  - api_key: []
+  - apiKey: []
 
 paths:
   /kpi:
     get:
       summary: Get KPIs.
       operationId: getKPIs
+      description: >
+        This endpoint employs cursor pagination for improved response handling
+        for both the server and the client. The cursor token needed for
+        subsequent requests is included in the response until all data is
+        exhausted.
+      parameters:
+        - name: limit
+          in: query
+          type: integer
+          required: false
+          default: 50
+          description: The number of results per page (1 - 50)
+        - name: cursor
+          in: query
+          type: string
+          required: false
+          default: null
+          description: Pagination cursor
+        - name: order
+          in: query
+          type: string
+          required: false
+          default: asc
+          description: Sort order based on creation date
       responses:
         200:
-          description: A successful response
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Kpi'
+          $ref: '#/responses/PaginatedKpis'
+        400:
+          $ref: '#/responses/BadRequest'
         500:
           $ref: '#/responses/Unavailable'
   /kpi/{id}:
@@ -59,7 +82,9 @@ paths:
       summary: Post KPI progression.
       operationId: postKPI
       security:
-        - api_key: []
+        - apiKey: []
+          apiClientId: []
+          apiClientSecret: []
       parameters:
         - name: id
           in: path
@@ -80,10 +105,6 @@ paths:
             example:
               progress: 123
               comment: A fine measurement
-        - name: okr-team-secret
-          in: header
-          description: Identify yourself with the secret you chose in your Team's settings
-          type: string
       responses:
         '200':
           description: A successful response
@@ -130,13 +151,13 @@ paths:
         required: true
         type: string
         format: date
-      - name: okr-team-secret
-        in: header
-        description: Identify yourself with the secret you chose in your Team's settings
-        type: string
     put:
       summary: Create or update KPI progression value.
       operationId: updateKPIProgressionValue
+      security:
+        - apiKey: []
+          apiClientId: []
+          apiClientSecret: []
       parameters:
         - name: value
           in: body
@@ -150,7 +171,7 @@ paths:
               comment:
                 type: string
             example:
-              progress: 123
+              value: 123
               comment: A fine measurement
       responses:
         200:
@@ -169,6 +190,10 @@ paths:
     delete:
       summary: Delete KPI progression value.
       operationId: deleteKPIProgressionValue
+      security:
+        - apiKey: []
+          apiClientId: []
+          apiClientSecret: []
       responses:
         200:
           description: A successful response
@@ -187,8 +212,6 @@ paths:
     get:
       summary: Get key result.
       operationId: getKeyRes
-      security:
-        - api_key: []
       parameters:
         - name: id
           in: path
@@ -208,7 +231,9 @@ paths:
       summary: Post key result progression.
       operationId: postKeyRes
       security:
-        - api_key: []
+        - apiKey: []
+          apiClientId: []
+          apiClientSecret: []
       parameters:
         - name: id
           in: path
@@ -245,23 +270,67 @@ paths:
           $ref: '#/responses/NotFound'
         500:
           $ref: '#/responses/Unavailable'
-  /status:
-    get:
-      summary: Get OKR Tracker metrics.
-      operationId: getStatus
+  /user/{id}:
+    patch:
+      summary: Update user details.
+      operationId: patchUser
+      security:
+        - apiKey: []
+          okrAdminSecret: []
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          type: string
+        - name: details
+          in: body
+          required: true
+          description: User details
+          schema:
+            type: object
+            properties:
+              displayName:
+                type: string
+              position:
+                type: string
+            example:
+              displayName: Foo Bar
+              position: director
       responses:
-        200:
+        '200':
           description: A successful response
           schema:
-            $ref: '#/definitions/TrackerMetrics'
-        500:
+            type: string
+            example: "User updated"
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '404':
+          $ref: '#/responses/NotFound'
+        '500':
           $ref: '#/responses/Unavailable'
 
 securityDefinitions:
-  api_key:
-    type: "apiKey"
-    name: "x-api-key"
-    in: "header"
+  apiKey:
+    type: apiKey
+    name: x-api-key
+    in: header
+  apiClientId:
+    type: apiKey
+    name: okr-client-id
+    in: header
+    description: Identify yourself with the identifier of your API client
+  apiClientSecret:
+    type: apiKey
+    name: okr-client-secret
+    in: header
+    description: Identify yourself with the secret of your API client
+  okrAdminSecret:
+    type: apiKey
+    name: okr-admin-secret
+    in: header
 
 definitions:
   Keyres:
@@ -346,24 +415,43 @@ definitions:
         format: date-time
       editedBy:
         type: string
-  TrackerMetrics:
+  Pagination:
     properties:
-      kpis:
-        type: object
-        properties:
-          total:
-            type: integer
-          state:
-            type: object
-            properties:
-              stale:
-                type: integer
-              unknown:
-                type: integer
+      limit:
+        type: integer
+        example: 25
+      order:
+        type: string
+        example: asc
+      results_count:
+        type: integer
+        example: 25
+      cursor:
+        type: string
+      next_cursor:
+        type: string
 
 responses:
+  PaginatedKpis:
+    description: Paginated KPI list
+    schema:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/definitions/Pagination'
+        results:
+          type: array
+          items:
+            $ref: '#/definitions/Kpi'
   NotFound:
     description: Resource not found
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+  Unauthorized:
+    description: Unauthorized for the requested operation on the resource
     schema:
       type: object
       properties:
@@ -380,6 +468,8 @@ responses:
     description: A bad request
     schema:
       type: object
+      required:
+        - message
       properties:
         errors:
           type: object

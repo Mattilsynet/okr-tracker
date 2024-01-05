@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="create-container">
+  <page-layout breakpoint="tablet">
+    <div class="card">
       <h1 class="title-1">{{ $t('admin.organization.create') }}</h1>
 
       <form-section>
@@ -23,9 +23,13 @@
           data-cy="org-missionStatement"
         />
 
-        <div class="form-group">
-          <span class="form-label">{{ $t('general.teamMembers') }}</span>
+        <div class="pkt-form-group">
+          <span class="pkt-form-label" for="teamMembers">
+            {{ $t('general.teamMembers') }}
+            <span class="pkt-badge">{{ $t('validation.optional') }}</span>
+          </span>
           <v-select
+            id="teamMembers"
             v-model="team"
             multiple
             :options="users"
@@ -40,7 +44,7 @@
 
         <template #actions="{ handleSubmit, submitDisabled }">
           <btn-save
-            :label="$t('btn.create')"
+            :text="$t('btn.create')"
             :disabled="submitDisabled || loading"
             data-cy="btn-createOrg"
             @click="handleSubmit(save)"
@@ -48,7 +52,7 @@
         </template>
       </form-section>
     </div>
-  </div>
+  </page-layout>
 </template>
 
 <script>
@@ -81,7 +85,6 @@ export default {
         missionStatement: missionStatement.trim(),
         archived: false,
         team: team.map(({ id }) => db.collection('users').doc(id)),
-        slack: [],
       };
 
       this.loading = true;
